@@ -1,5 +1,13 @@
 # service-library-catalog-php
 
+
+
+127.0.0.1 host.docker.internal
+
+docker exec -it rds-library bash -c "mysql -uroot -pmy-secret-pw -e \"create database catalogue CHARACTER SET utf8 COLLATE utf8_general_ci\""
+
+
+
 [![Latest Version on Packagist][ico-version]][link-packagist]
 [![Software License][ico-license]](LICENSE.md)
 [![Build Status](https://travis-ci.org/oitimon/php-skeleton.svg?branch=master)](https://travis-ci.org/oitimon/php-skeleton)

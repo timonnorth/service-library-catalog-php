@@ -4,4 +4,4 @@ services:
   php:
     build:
       context: .
-    container_name: service-library-catalog-php
+    container_name: service-catalogue-php
