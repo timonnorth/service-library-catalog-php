@@ -22,6 +22,9 @@ build:
             command: phpcs-run
             use_website_config: false
     coverage:
+      environment:
+        php:
+          version: 7.4
       tests:
         override:
           -
