@@ -68,7 +68,7 @@ class Serializer
     /**
      * @param array $data
      * @param string $classname
-     * @return array
+     * @return mixed
      * @throws HydrateException
      */
     public function hydrate(array $data, string $classname = '')
