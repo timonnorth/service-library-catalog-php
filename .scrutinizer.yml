@@ -8,16 +8,20 @@ checks:
     code_rating: true
     duplication: true
 build:
+  dependencies:
+    after:
+      - composer require --dev "squizlabs/php_codesniffer=3.5"
   environment:
     php:
       version: 7.4
   tests:
     override:
-      -
-        command: 'composer test'
+      - command: 'composer test'
         coverage:
           file: 'build/logs/clover.xml'
           format: 'clover'
+      - command: phpcs-run
+        use_website_config: false
 tools:
   external_code_coverage: false
   php_mess_detector: true
