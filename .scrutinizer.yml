@@ -13,17 +13,22 @@ build:
       dependencies:
         after:
           - composer require --dev "squizlabs/php_codesniffer=3.5.8"
-  environment:
-    php:
-      version: 7.4
-  tests:
-    override:
-      - command: 'composer test'
-        coverage:
-          file: 'build/logs/clover.xml'
-          format: 'clover'
-      - command: phpcs-run
-        use_website_config: false
+      environment:
+        php:
+          version: 7.4
+      tests:
+        override:
+          -
+            command: phpcs-run
+            use_website_config: false
+    coverage:
+      tests:
+        override:
+          -
+            command: 'composer test'
+            coverage:
+              file: 'build/logs/clover.xml'
+              format: 'clover'
 tools:
   external_code_coverage: false
   php_mess_detector: true
