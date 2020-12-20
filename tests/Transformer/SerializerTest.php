@@ -37,6 +37,12 @@ class SerializerTest extends \PHPUnit\Framework\TestCase
         $this->getSerializer()->deserialize('{"__cn":"tiesto"}');
     }
 
+    public function testExtractFields()
+    {
+        $data = $this->getSerializer()->extractFields($this->getObject1());
+        self::assertEquals(['a' => 'a', 'b' => 'b'], $data);
+    }
+
     protected function getSerializer(): Serializer
     {
         if ($this->serializer == null) {

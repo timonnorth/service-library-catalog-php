@@ -38,7 +38,7 @@
         }
     },
     "scripts": {
-        "test": "phpunit --coverage-clover build/logs/clover.xml",
+        "test": "phpunit",
         "check-style": "phpcs src tests",
         "fix-style": "phpcbf src tests"
     },

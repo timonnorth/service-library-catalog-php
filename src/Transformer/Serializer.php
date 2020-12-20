@@ -57,12 +57,20 @@ class Serializer
     }
 
     /**
+     * Extract all public fields (but not arrays and objects).
+     *
      * @param object $object
      * @return array
      */
     public function extractFields(object $object): array
     {
-        return get_object_vars($object);
+        $res = get_object_vars($object);
+        foreach ($res as $key => $value) {
+            if (is_array($value) || is_object($value)) {
+                unset($res[$key]);
+            }
+        }
+        return $res;
     }
 
     /**
