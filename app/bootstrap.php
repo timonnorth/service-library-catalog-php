@@ -22,8 +22,10 @@ $container->set('Locker', $factory);*/
 
 /** @var LibraryCatalog\Service\Catalogue $catalogue */
 $catalogue = $container->get('Catalogue');
-$author = LibraryCatalog\Entity\Author::createAuthor("Charles Dickens", "1812-02-07", "1870-06-09", "Born in Portsmouth, Dickens left school to work in a factory when his father was incarcerated in a debtors' prison.", "Charles John Huffam Dickens FRSA (/ˈdɪkɪnz/; 7 February 1812 – 9 June 1870) was an English writer and social critic. He created some of the world's best-known fictional characters and is regarded by many as the greatest novelist of the Victorian era.[1] His works enjoyed unprecedented popularity during his lifetime, and by the 20th century, critics and scholars had recognised him as a literary genius. His novels and short stories are still widely read today.[2][3] ");
 
-$catalogue->createAuthor($author);
+//$author = LibraryCatalog\Entity\Author::createAuthor("Charles Dickens", "1812-02-07", "1870-06-09", "Born in Portsmouth, Dickens left school to work in a factory when his father was incarcerated in a debtors' prison.", "Charles John Huffam Dickens FRSA (/ˈdɪkɪnz/; 7 February 1812 – 9 June 1870) was an English writer and social critic. He created some of the world's best-known fictional characters and is regarded by many as the greatest novelist of the Victorian era.[1] His works enjoyed unprecedented popularity during his lifetime, and by the 20th century, critics and scholars had recognised him as a literary genius. His novels and short stories are still widely read today.[2][3] ");
+//$catalogue->createAuthor($author);
+
+$author = $catalogue->fetchAuthor(6);
 
 var_dump($author);

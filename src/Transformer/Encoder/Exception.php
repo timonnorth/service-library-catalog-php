@@ -20,9 +20,6 @@ class Exception extends AppException
         if ($message == '') {
             $message = 'Can not encode/decode JSON';
         }
-        if ($code == 0) {
-            $code = 'encoder.error';
-        }
         parent::__construct($message, $code, $previous);
     }
 }

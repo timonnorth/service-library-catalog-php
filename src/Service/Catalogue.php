@@ -18,6 +18,11 @@ class Catalogue
         $this->authorRepository = $authorRepository;
     }
 
+    public function fetchAuthor($id): ?Author
+    {
+        return $this->authorRepository->load($id);
+    }
+
     public function createAuthor(Author $author): void
     {
         //@todo Lock.

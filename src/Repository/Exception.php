@@ -13,9 +13,6 @@ class Exception extends AppException
         if ($message == '') {
             $message = 'Repository exception';
         }
-        if ($code == 0) {
-            $code = 'repository.error';
-        }
         parent::__construct($message, $code, $previous);
     }
 }

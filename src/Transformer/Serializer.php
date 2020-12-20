@@ -57,28 +57,12 @@ class Serializer
     }
 
     /**
-     * @param $data
-     * @return mixed
+     * @param object $object
+     * @return array
      */
-    protected function normalizeObject($data)
+    public function extractFields(object $object): array
     {
-        if (is_object($data)) {
-            $data->__cn = get_class($data);
-
-            foreach ($data as $key => $value) {
-                if (is_object($value)) {
-                    $data->{$key} = $this->normalizeObject($value);
-                } elseif (is_array($value)) {
-                    $data->{$key} = [];
-
-                    foreach ($value as $keyIn => $valueIn) {
-                        $data->{$key}[$keyIn] = $this->normalizeObject($valueIn);
-                    }
-                }
-            }
-        }
-
-        return $data;
+        return get_object_vars($object);
     }
 
     /**
@@ -87,7 +71,7 @@ class Serializer
      * @return array
      * @throws HydrateException
      */
-    protected function hydrate(array $data, string $classname = '')
+    public function hydrate(array $data, string $classname = '')
     {
         try {
             if ($classname != '') {
@@ -118,5 +102,30 @@ class Serializer
         }
 
         return $object;
+    }
+
+    /**
+     * @param $data
+     * @return mixed
+     */
+    protected function normalizeObject($data)
+    {
+        if (is_object($data)) {
+            $data->__cn = get_class($data);
+
+            foreach ($data as $key => $value) {
+                if (is_object($value)) {
+                    $data->{$key} = $this->normalizeObject($value);
+                } elseif (is_array($value)) {
+                    $data->{$key} = [];
+
+                    foreach ($value as $keyIn => $valueIn) {
+                        $data->{$key}[$keyIn] = $this->normalizeObject($valueIn);
+                    }
+                }
+            }
+        }
+
+        return $data;
     }
 }

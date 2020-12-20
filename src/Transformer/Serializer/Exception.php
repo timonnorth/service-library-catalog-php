@@ -20,9 +20,6 @@ class Exception extends AppException
         if ($message == '') {
             $message = 'Can not serialize/deserialize object';
         }
-        if ($code == 0) {
-            $code = 'serializer.error';
-        }
         parent::__construct($message, $code, $previous);
     }
 }

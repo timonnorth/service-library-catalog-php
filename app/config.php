@@ -2,12 +2,11 @@
 
 return [
     'Json' => \DI\create(LibraryCatalog\Transformer\Encoder\Json::class),
-    'SerializerEntity' => \DI\create(LibraryCatalog\Transformer\Entity::class),
     'Serializer' => \DI\create(LibraryCatalog\Transformer\Serializer::class)
         ->constructor(new LibraryCatalog\Transformer\Encoder\Json()),
     'AuthorRepositoryPdo' => \Di\create(LibraryCatalog\Repository\AuthorRepositoryPdo::class)
         ->constructor(
-            \Di\get('SerializerEntity'),
+            \Di\get('Serializer'),
             getenv('MYSQL_HOST'),
             getenv('MYSQL_USER'),
             getenv('MYSQL_PASSWORD'),
