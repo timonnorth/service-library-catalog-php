@@ -1,30 +1,20 @@
 <?php
 
 return [
-    'Serializer' => \DI\create(\Transformer\Serializer::class)
-        ->constructor(new \Transformer\Encoder\Json()),
-    'MatchStorage' => \DI\create(\Infrastructure\Persistence\MatchRepositoryManager::class)
+    'Json' => \DI\create(LibraryCatalog\Transformer\Encoder\Json::class),
+    'SerializerEntity' => \DI\create(LibraryCatalog\Transformer\Entity::class),
+    'Serializer' => \DI\create(LibraryCatalog\Transformer\Serializer::class)
+        ->constructor(new LibraryCatalog\Transformer\Encoder\Json()),
+    'AuthorRepositoryPdo' => \Di\create(LibraryCatalog\Repository\AuthorRepositoryPdo::class)
         ->constructor(
-            \DI\get('Serializer')
+            \Di\get('SerializerEntity'),
+            getenv('MYSQL_HOST'),
+            getenv('MYSQL_USER'),
+            getenv('MYSQL_PASSWORD'),
+            getenv('MYSQL_DBNAME'),
         ),
-    'GameFactory' => \DI\create(\Service\GameFactory::class)
+    'Catalogue' => \DI\create(LibraryCatalog\Service\Catalogue::class)
         ->constructor(
-            \DI\get('RulesLoader'),
-            \DI\get('MatchStorage'),
-            \DI\get('Locker'),
-            \DI\get('Metrics'),
-            \DI\get('Logger')
-        ),
-    'Json'        => \DI\create(\Transformer\Encoder\Json::class),
-    'RulesLoader' => \DI\create(\Service\RulesLoader::class)
-        ->constructor(
-            \DI\get('Json'),
-            \DI\get('Logger')
-        ),
-    'Metrics' => \DI\create(\Infrastructure\Metrics\Metrics::class),
-    'Logger'  => \DI\create(Infrastructure\Logger\StubLogger::class),
-    'Catalogue' => \DI\create(\Service\Catalogue::class)
-        ->constructor(
-
+            \Di\get('AuthorRepositoryPdo'),
         )
 ];

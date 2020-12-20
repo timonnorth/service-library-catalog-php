@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Repository;
+namespace LibraryCatalog\Repository;
 
-use Entity\Author;
+use LibraryCatalog\Entity\Author;
 
 interface AuthorRepositoryInterface
 {

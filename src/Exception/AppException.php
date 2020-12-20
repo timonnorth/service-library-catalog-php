@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Exception;
+namespace LibraryCatalog\Exception;
 
 class AppException extends \Exception
 {

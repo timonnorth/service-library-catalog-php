@@ -33,6 +33,10 @@ services:
     environment:
       - APP_FRONT_STORAGE=Redis
       - APP_REDIS_PARAMS=tcp://host.docker.internal:6379
+      - MYSQL_HOST=host.docker.internal
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=my-secret-pw
+      - MYSQL_DBNAME=catalogue
     networks:
       - code-network
 

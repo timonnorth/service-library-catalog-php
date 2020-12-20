@@ -13,12 +13,13 @@ class CreateAuthorsTable extends Migration
             CREATE TABLE IF NOT EXISTS `authors` (
                 `id` int(11) NOT NULL AUTO_INCREMENT,
                 `name` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
-                `birthdate` date,
+                `birthdate` date NOT NULL,
                 `deathdate` date,
                 `biography` TEXT COLLATE utf8_unicode_ci,
                 `summary` TEXT COLLATE utf8_unicode_ci,
                 PRIMARY KEY (`id`),
-                KEY `author_name` (`name`)
+                KEY `author_name` (`name`),
+                UNIQUE KEY `author_name_birthdate` (`name`, `birthdate`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
         $container = $this->getContainer();
         $container['db']->query($sql);

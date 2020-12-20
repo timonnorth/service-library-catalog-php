@@ -2,32 +2,25 @@
 
 declare(strict_types=1);
 
-namespace Service;
+namespace LibraryCatalog\Service;
 
-use Entity\Author;
-use Repository\AuthorRepositoryInterface;
+use LibraryCatalog\Entity\Author;
+use LibraryCatalog\Repository\AuthorRepositoryInterface;
 
 class Catalogue
 {
     /** @var AuthorRepositoryInterface */
-    protected AuthorRepositoryInterface $authorFrontRepository;
-    /** @var AuthorRepositoryInterface */
-    protected AuthorRepositoryInterface $authorBackRepository;
+    protected AuthorRepositoryInterface $authorRepository;
 
     public function __construct(
-        AuthorRepositoryInterface $authorFrontRepository,
-        AuthorRepositoryInterface $authorBackRepository
+        AuthorRepositoryInterface $authorRepository
     ) {
-        $this->authorFrontRepository = $authorFrontRepository;
-        $this->authorBackRepository = $authorBackRepository;
+        $this->authorRepository = $authorRepository;
     }
 
     public function createAuthor(Author $author): void
     {
         //@todo Lock.
-        $this->authorBackRepository->save($author);
-        if ($this->authorFrontRepository) {
-            $this->authorFrontRepository->save($author);
-        }
+        $this->authorRepository->save($author);
     }
 }
