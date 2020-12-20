@@ -21,7 +21,7 @@ trait PdoTrait
      */
     protected function prepareConnection(string $host, string $user, string $password, string $dbname): void
     {
-        $this->connection = function() use ($host, $user, $password, $dbname): \PDO {
+        $this->connection = function () use ($host, $user, $password, $dbname): \PDO {
             if (!$this->pdoReady) {
                 $this->pdo = new \PDO(
                     sprintf('mysql:dbname=%s;host=%s', $dbname, $host),
@@ -72,7 +72,7 @@ trait PdoTrait
                     $rowValues .= ',';
                 }
                 $rowNames .= $name;
-                $rowValues .= ':'.$name;
+                $rowValues .= ':' . $name;
             } else {
                 unset($data[$name]);
             }
