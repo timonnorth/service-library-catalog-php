@@ -13,16 +13,17 @@ build:
       version: 7.4
   tests:
     override:
-      - command: 'composer test'
+      -
+        command: 'composer test'
         coverage:
           file: 'build/logs/clover.xml'
           format: 'clover'
 tools:
   external_code_coverage: false
   php_mess_detector: true
-  php_code_sniffer:
-    config:
-      standard: PSR12
+#  php_code_sniffer:
+#    config:
+#      standard: PSR12
   sensiolabs_security_checker: true
   php_code_coverage: true
   php_pdepend: true
