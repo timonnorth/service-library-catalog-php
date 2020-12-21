@@ -48,10 +48,10 @@ trait PdoTrait
 
         $stmt = $pdo->prepare("SELECT * FROM $table WHERE id = ? LIMIT 1");
         if ($stmt === false) {
-            throw new Exception("Can not init PDO: " . json_encode($pdo->errorInfo()));
+            throw new Exception("Can not init PDO: " . json_encode($pdo->errorInfo()), (int)$pdo->errorCode());
         }
         $stmt->execute([$id]);
-        $res = $stmt->fetch();
+        $res = $stmt->fetch(\PDO::FETCH_ASSOC);
         // Convert false to null.
         return $res ? $res : null;
     }
@@ -87,10 +87,10 @@ trait PdoTrait
         $pdo = ($this->connection)();
         $stmt = $pdo->prepare("INSERT INTO $table ($rowNames) VALUES ($rowValues)");
         if ($stmt === false) {
-            throw new Exception("Can not init PDO: " . json_encode($pdo->errorInfo()));
+            throw new Exception("Can not init PDO: " . json_encode($pdo->errorInfo()), (int)$pdo->errorCode());
         }
         if (!$stmt->execute($data)) {
-            throw new Exception("Can not insert data in PDO: " . json_encode($pdo->errorInfo()));
+            throw new Exception("Can not insert data in PDO: " . json_encode($pdo->errorInfo()), (int)$pdo->errorCode());
         }
 
         return $pdo->lastInsertId();

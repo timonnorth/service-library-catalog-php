@@ -6,12 +6,13 @@ namespace Tests;
 
 use DI\Container;
 use DI\ContainerBuilder;
+use LibraryCatalog\Transformer\Serializer;
 use Psr\Http\Message\ResponseInterface;
 
 class TestCase extends \PHPUnit\Framework\TestCase
 {
     /** @var Container */
-    protected $container;
+    protected ?Container $container;
 
     /**
      * TestCase constructor.
@@ -24,9 +25,7 @@ class TestCase extends \PHPUnit\Framework\TestCase
         if (!defined('__APPDIR__')) {
             define('__APPDIR__', realpath(sprintf('%s/..', __DIR__)));
         }
-
-        // Do some migrations.
-        $this->migrate();
+        $this->container = null;
 
         parent::__construct($name, $data, $dataName);
     }
@@ -59,7 +58,11 @@ class TestCase extends \PHPUnit\Framework\TestCase
         return $response;
     }
 
-    protected function migrate(): void
+    /**
+     * @throws \DI\DependencyException
+     * @throws \DI\NotFoundException
+     */
+    protected function runDbMigration(): void
     {
         require_once __APPDIR__ . "/app/migrations/20111101000145_CreateAuthorsTable.php";
         $stmt = $this->pdo()->prepare((new \CreateAuthorsTable(0))->sqlSqlite());
@@ -79,5 +82,15 @@ class TestCase extends \PHPUnit\Framework\TestCase
     protected function pdo(): \PDO
     {
         return $this->getContainer()->get('AuthorRepository')->pdo();
+    }
+
+    /**
+     * @return Serializer
+     * @throws \DI\DependencyException
+     * @throws \DI\NotFoundException
+     */
+    protected function getSerializer(): Serializer
+    {
+        return $this->getContainer()->get('Serializer');
     }
 }
