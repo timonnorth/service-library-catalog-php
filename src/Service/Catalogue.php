@@ -25,7 +25,6 @@ class Catalogue
 
     public function createAuthor(Author $author): void
     {
-        //@todo Lock.
         $this->authorRepository->save($author);
     }
 }

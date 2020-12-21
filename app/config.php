@@ -2,6 +2,8 @@
 
 return [
     'Json' => \DI\create(LibraryCatalog\Transformer\Encoder\Json::class),
+    'HttpTransformer' => \DI\create(LibraryCatalog\Transformer\JsonHttpSerializer::class)
+        ->constructor(new LibraryCatalog\Transformer\Encoder\Json()),
     'Serializer' => \DI\create(LibraryCatalog\Transformer\Serializer::class)
         ->constructor(new LibraryCatalog\Transformer\Encoder\Json()),
     'AuthorRepositoryPdo' => \Di\create(LibraryCatalog\Repository\AuthorRepositoryPdo::class)
