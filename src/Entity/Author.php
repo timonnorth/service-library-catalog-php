@@ -13,11 +13,16 @@ class Author
     /** @var string */
     public string $birthdate;
     /** @var string */
-    public string $deathdate;
+    public ?string $deathdate;
     /** @var string */
-    public string $biography;
+    public ?string $biography;
     /** @var string */
-    public string $summary;
+    public ?string $summary;
+    /** @var Book[] */
+    public array $books;
+
+    /** @var bool */
+    protected bool $areBooksLoaded = false;
 
     /**
      * @param string $name
@@ -27,14 +32,14 @@ class Author
      * @param string $summary
      * @return Author
      */
-    public static function createAuthor(
+    public static function create(
         string $name,
-        string $birthdate = '',
-        string $deathdate = '',
-        string $biography = '',
-        string $summary = ''
+        string $birthdate,
+        string $deathdate = null,
+        string $biography = null,
+        string $summary = null
     ): Author {
-        $author = new Author();
+        $author = new static();
 
         $author->name = $name;
         $author->birthdate = $birthdate;
@@ -43,5 +48,25 @@ class Author
         $author->summary = $summary;
 
         return $author;
+    }
+
+    /**
+     * @return bool
+     */
+    public function arBooksLoaded(): bool
+    {
+        return $this->areBooksLoaded;
+    }
+
+    /**
+     * @param Book[] $books
+     * @return Author
+     */
+    public function setBooks(array $books): Author
+    {
+        $this->books = $books;
+        $this->areBooksLoaded = true;
+
+        return $this;
     }
 }

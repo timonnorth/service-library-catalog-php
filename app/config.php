@@ -8,14 +8,24 @@ return [
         ->constructor(new LibraryCatalog\Transformer\Encoder\Json()),
     'AuthorRepositoryPdo' => \Di\create(LibraryCatalog\Repository\AuthorRepositoryPdo::class)
         ->constructor(
+            \Di\get('BookRepositoryPdo'),
             \Di\get('Serializer'),
             getenv('MYSQL_HOST'),
             getenv('MYSQL_USER'),
             getenv('MYSQL_PASSWORD'),
             getenv('MYSQL_DBNAME'),
-        ),
+            ),
+    'BookRepositoryPdo' => \Di\create(LibraryCatalog\Repository\BookRepositoryPdo::class)
+        ->constructor(
+            \Di\get('Serializer'),
+            getenv('MYSQL_HOST'),
+            getenv('MYSQL_USER'),
+            getenv('MYSQL_PASSWORD'),
+            getenv('MYSQL_DBNAME'),
+            ),
     'Catalogue' => \DI\create(LibraryCatalog\Service\Catalogue::class)
         ->constructor(
             \Di\get('AuthorRepositoryPdo'),
+            \Di\get('BookRepositoryPdo'),
         )
 ];

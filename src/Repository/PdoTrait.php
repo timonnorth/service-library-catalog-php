@@ -53,7 +53,48 @@ trait PdoTrait
         $stmt->execute([$id]);
         $res = $stmt->fetch(\PDO::FETCH_ASSOC);
         // Convert false to null.
-        return $res ? $res : null;
+        return $res ?: null;
+    }
+
+    /**
+     * @param string $table
+     * @param string $condition
+     * @param array $conditionData
+     * @param int $limit
+     * @param string $order
+     * @return array
+     * @throws Exception
+     */
+    protected function fetchList(
+        string $table,
+        string $condition = '',
+        array $conditionData = [],
+        int $limit = 1000,
+        string $order = ''
+    ): array {
+        /** @var \PDO $pdo */
+        $pdo = ($this->connection)();
+
+        // Prepare SQL with params.
+        $sql = "SELECT * FROM $table";
+        if ($condition != '') {
+            $sql .= ' WHERE ' . $condition;
+        }
+        if ($order != '') {
+            $sql .= ' ORDER BY ' . $order;
+        }
+        if ($limit > 0) {
+            $sql .= ' LIMIT ' . $limit;
+        }
+
+        $stmt = $pdo->prepare($sql);
+        if ($stmt === false) {
+            throw new Exception("Can not init PDO: " . json_encode($pdo->errorInfo()), (int)$pdo->errorCode());
+        }
+        $stmt->execute($conditionData);
+        $res = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        // Convert false to empty result.
+        return $res ?: [];
     }
 
     /**

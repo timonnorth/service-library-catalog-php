@@ -65,12 +65,19 @@ class TestCase extends \PHPUnit\Framework\TestCase
     protected function runDbMigration(): void
     {
         require_once __APPDIR__ . "/app/migrations/20111101000145_CreateAuthorsTable.php";
-        $stmt = $this->pdo()->prepare((new \CreateAuthorsTable(0))->sqlSqlite());
-        if ($stmt === false) {
-            throw new \Exception(json_encode($this->pdo()->errorInfo()));
-        }
-        if (!$stmt->execute()) {
-            throw new \Exception(json_encode($this->pdo()->errorInfo()));
+        require_once __APPDIR__ . "/app/migrations/20111101000146_CreateBooksTable.php";
+
+        foreach ([
+            (new \CreateAuthorsTable(0))->sqlSqlite(),
+            (new \CreateBooksTable(0))->sqlSqlite(),
+        ] as $sql) {
+            $stmt = $this->pdo()->prepare($sql);
+            if ($stmt === false) {
+                throw new \Exception(json_encode($this->pdo()->errorInfo()));
+            }
+            if (!$stmt->execute()) {
+                throw new \Exception(json_encode($this->pdo()->errorInfo()));
+            }
         }
     }
 
