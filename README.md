@@ -7,6 +7,21 @@
 docker exec -it rds-library bash -c "mysql -uroot -pmy-secret-pw -e \"create database catalogue CHARACTER SET utf8 COLLATE utf8_general_ci\""
 
 
+Build a tiny REST API and use this to build 2 resources.
+Books and Authors.
+
+GET: /book/:id
+Expect a book with the author
+
+GET: /author/:id
+Expect an author with all his books
+
+POST: /author/
+Create an author
+
+POST: /book
+Create a book and add an author to it.
+
 
 [![Latest Version on Packagist][ico-version]][link-packagist]
 [![Software License][ico-license]](LICENSE.md)

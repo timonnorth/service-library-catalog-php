@@ -18,10 +18,10 @@ class Error
      */
     public static function create(string $message, string $code = ''): Error
     {
-        $error = new static();
-        $error->message = _($message);
-        $error->code = $code;
+        $object = new static();
+        $object->message = _($message);
+        $object->code = $code;
 
-        return $error;
+        return $object;
     }
 }

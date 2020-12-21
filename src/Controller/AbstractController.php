@@ -6,16 +6,14 @@ namespace LibraryCatalog\Controller;
 
 use DI\Container;
 use LibraryCatalog\Controller\ValueObject\Error as ErrorDto;
+use LibraryCatalog\Controller\ValueObject\Status;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use Psr\Http\Message\ResponseInterface;
-use Zend\HttpHandlerRunner\Emitter\SapiEmitter;
 
 abstract class AbstractController
 {
     /** @var Container */
     protected Container $container;
-    /** @var SapiEmitter */
-    protected SapiEmitter $emmiter;
     /** @var Psr17Factory */
     protected Psr17Factory $responseFactory;
 
@@ -23,7 +21,6 @@ abstract class AbstractController
     {
         $this->container = $container;
         $this->responseFactory = new \Nyholm\Psr7\Factory\Psr17Factory();
-        $this->emmiter = new \Zend\HttpHandlerRunner\Emitter\SapiEmitter();
     }
 
     /**
@@ -32,10 +29,11 @@ abstract class AbstractController
      * @param string $code
      * @throws \DI\DependencyException
      * @throws \DI\NotFoundException
+     * @return ResponseInterface
      */
-    public function systemError(string $uri, string $message = 'System error', string $code = '')
+    public function systemError(string $uri, string $message = 'System error', string $code = ''): ResponseInterface
     {
-        $this->error($uri, 500, $message, $code);
+        return $this->error($uri, 500, $message, $code);
     }
 
     /**
@@ -44,10 +42,11 @@ abstract class AbstractController
      * @param string $code
      * @throws \DI\DependencyException
      * @throws \DI\NotFoundException
+     * @return ResponseInterface
      */
-    public function notFoundError(string $uri, string $message = 'Page not found', string $code = '')
+    public function notFoundError(string $uri, string $message = 'Page not found', string $code = ''): ResponseInterface
     {
-        $this->error($uri, 404, $message, $code);
+        return $this->error($uri, 404, $message, $code);
     }
 
     /**
@@ -57,25 +56,26 @@ abstract class AbstractController
      * @param string $code
      * @throws \DI\DependencyException
      * @throws \DI\NotFoundException
+     * @return ResponseInterface
      */
-    protected function error(string $uri, int $httpStatusCode, string $message = 'Page not found', string $code = '')
+    protected function error(string $uri, int $httpStatusCode = 500, string $message = 'Page not found', string $code = ''): ResponseInterface
     {
-        $this->emmit($response = $this->responseFactory->createResponse($httpStatusCode)->withBody(
+        return $this->responseFactory->createResponse($httpStatusCode)->withBody(
             $this->responseFactory->createStream($this->transform(ErrorDto::create($message)))
-        ));
+        );
     }
 
     /**
-     * @param ResponseInterface $response
+     * @param string $status
+     * @return ResponseInterface
      * @throws \DI\DependencyException
      * @throws \DI\NotFoundException
      */
-    protected function emmit(ResponseInterface $response): void
+    protected function status(string $status = 'Ok'): ResponseInterface
     {
-        foreach ($this->container->get('HttpTransformer')->getResponseHeaders() as $name => $value) {
-            $response = $response->withHeader($name, $value);
-        }
-        $this->emmiter->emit($response);
+        return $this->responseFactory->createResponse(200)->withBody(
+            $this->responseFactory->createStream($this->transform(Status::create($status)))
+        );
     }
 
     /**

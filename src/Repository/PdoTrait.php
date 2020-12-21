@@ -26,7 +26,8 @@ trait PdoTrait
                 $this->pdo = new \PDO(
                     sprintf('mysql:dbname=%s;host=%s', $dbname, $host),
                     $user,
-                    $password
+                    $password,
+                    array(\PDO::ATTR_PERSISTENT => true)
                 );
                 $this->pdoReady = true;
             }
@@ -38,6 +39,7 @@ trait PdoTrait
      * @param string $table
      * @param mixed $id
      * @return array|null
+     * @throws Exception
      */
     protected function fetchOne(string $table, $id): ?array
     {
@@ -45,6 +47,9 @@ trait PdoTrait
         $pdo = ($this->connection)();
 
         $stmt = $pdo->prepare("SELECT * FROM $table WHERE id = ? LIMIT 1");
+        if ($stmt === false) {
+            throw new Exception("Can not init PDO: " . json_encode($pdo->errorInfo()));
+        }
         $stmt->execute([$id]);
         $res = $stmt->fetch();
         // Convert false to null.
@@ -80,9 +85,12 @@ trait PdoTrait
 
         /** @var \PDO $pdo */
         $pdo = ($this->connection)();
-        $sql = "INSERT INTO $table ($rowNames) VALUES ($rowValues)";
-        if (!$pdo->prepare($sql)->execute($data)) {
-            throw new Exception("Can not insert data in PDO");
+        $stmt = $pdo->prepare("INSERT INTO $table ($rowNames) VALUES ($rowValues)");
+        if ($stmt === false) {
+            throw new Exception("Can not init PDO: " . json_encode($pdo->errorInfo()));
+        }
+        if (!$stmt->execute($data)) {
+            throw new Exception("Can not insert data in PDO: " . json_encode($pdo->errorInfo()));
         }
 
         return $pdo->lastInsertId();

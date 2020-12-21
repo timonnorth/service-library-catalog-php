@@ -34,6 +34,7 @@ class AuthorRepositoryPdo implements AuthorRepositoryInterface
      * @param mixed $id
      * @return Author|null
      * @throws Serializer\HydrateException
+     * @throws Exception
      */
     public function load($id): ?Author
     {
