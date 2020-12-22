@@ -8,6 +8,7 @@ use LibraryCatalog\Entity\Author;
 use LibraryCatalog\Entity\Book;
 use LibraryCatalog\Service\Repository\AuthorRepositoryInterface;
 use LibraryCatalog\Service\Repository\BookRepositoryInterface;
+use LibraryCatalog\Service\Repository\WarmRepositoryInterface;
 
 class Catalogue
 {
@@ -36,10 +37,14 @@ class Catalogue
      */
     public function fetchAuthor($id, bool $withBooks = false): ?Author
     {
-        $author = $this->authorRepository->load($id);
+        $author = $this->authorRepository->load($id, $withBooks);
         if ($author && $withBooks && !$author->areBooksLoaded()) {
             // Load and set books for Author.
             $author->setBooks($this->bookRepository->loadByAuthorId($author->id));
+            if ($this->authorRepository instanceof WarmRepositoryInterface) {
+                // We can warm cache-repository with books.
+                $this->authorRepository->save($author);
+            }
         }
         return $author;
     }

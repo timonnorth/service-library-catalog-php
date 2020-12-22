@@ -35,11 +35,12 @@ class AuthorRepositoryPdo implements AuthorRepositoryInterface
 
     /**
      * @param mixed $id
+     * @param bool $withBooks
      * @return Author|null
      * @throws Exception
      * @throws Serializer\HydrateException
      */
-    public function load($id): ?Author
+    public function load($id, bool $withBooks = false): ?Author
     {
         $data = $this->fetchOne(static::TABLE_NAME, $id);
         return $data ? $this->serializer->hydrate($data, Author::class) : null;

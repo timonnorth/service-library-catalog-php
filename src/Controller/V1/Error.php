@@ -6,4 +6,5 @@ namespace LibraryCatalog\Controller\V1;
 
 class Error extends AbstractController
 {
+    //
 }

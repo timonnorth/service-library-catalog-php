@@ -61,7 +61,7 @@ abstract class AbstractController
     protected function error(string $uri, int $httpStatusCode = 500, string $message = 'Page not found', string $code = ''): ResponseInterface
     {
         return $this->responseFactory->createResponse($httpStatusCode)->withBody(
-            $this->responseFactory->createStream($this->transform(ErrorDto::create($message)))
+            $this->responseFactory->createStream($this->serialize(ErrorDto::create($message)))
         );
     }
 
@@ -73,8 +73,19 @@ abstract class AbstractController
      */
     protected function status(string $status = 'Ok'): ResponseInterface
     {
+        return $this->createResponse(Status::create($status));
+    }
+
+    /**
+     * @param $data
+     * @return ResponseInterface
+     * @throws \DI\DependencyException
+     * @throws \DI\NotFoundException
+     */
+    protected function createResponse($data): ResponseInterface
+    {
         return $this->responseFactory->createResponse(200)->withBody(
-            $this->responseFactory->createStream($this->transform(Status::create($status)))
+            $this->responseFactory->createStream($this->serialize($data))
         );
     }
 
@@ -84,7 +95,7 @@ abstract class AbstractController
      * @throws \DI\DependencyException
      * @throws \DI\NotFoundException
      */
-    protected function transform($data): string
+    protected function serialize($data): string
     {
         return $this->container->get('HttpTransformer')->serialize($data);
     }

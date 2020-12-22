@@ -35,7 +35,7 @@ class CreateBooksTable extends Migration
                 `summary` TEXT COLLATE utf8_unicode_ci,
                 `authorId` int(11) NOT NULL,
                 PRIMARY KEY (`id`),
-                KEY `title` (`name`),
+                FULLTEXT(`title`),
                 CONSTRAINT `book_author` FOREIGN KEY (`authorId`) REFERENCES `authors` (`id`) ON DELETE CASCADE
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
     }

@@ -37,7 +37,7 @@ class CreateAuthorsTable extends Migration
                 `biography` TEXT COLLATE utf8_unicode_ci,
                 `summary` TEXT COLLATE utf8_unicode_ci,
                 PRIMARY KEY (`id`),
-                KEY `author_name` (`name`),
+                FULLTEXT(`name`),
                 UNIQUE KEY `author_name_birthdate` (`name`, `birthdate`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
     }
