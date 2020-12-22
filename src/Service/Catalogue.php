@@ -64,10 +64,14 @@ class Catalogue
      */
     public function fetchBook($id, bool $withAuthor = false): ?Book
     {
-        $book = $this->bookRepository->load($id);
+        $book = $this->bookRepository->load($id, true);
         if ($book && $withAuthor && !$book->isAuthorLoaded()) {
             // Load and set author for book.
             $book->setAuthor($this->authorRepository->load($book->authorId));
+            if ($this->bookRepository instanceof WarmRepositoryInterface) {
+                // We can warm cache-repository with author.
+                $this->bookRepository->save($book);
+            }
         }
         return $book;
     }

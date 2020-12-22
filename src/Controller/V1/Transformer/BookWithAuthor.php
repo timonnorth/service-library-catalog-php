@@ -6,7 +6,7 @@ namespace LibraryCatalog\Controller\V1\Transformer;
 
 use LibraryCatalog\Controller\TransformerException;
 
-class AuthorWithBooks extends Author
+class BookWithAuthor extends Book
 {
     /**
      * @param $data
@@ -16,12 +16,7 @@ class AuthorWithBooks extends Author
     public function transform($data): array
     {
         $res = parent::transform($data);
-        $books = [];
-        $bookTransformer = new Book();
-        foreach ($data->books as $book) {
-            $books[] =  $bookTransformer->transform($book);
-        }
-        $res['books'] = $books;
+        $res['author'] = (new Author())->transform($data->author);
         return $res;
     }
 }

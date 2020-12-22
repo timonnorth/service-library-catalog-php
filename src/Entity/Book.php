@@ -14,8 +14,8 @@ class Book
     public ?string $summary;
     /** @var mixed */
     public $authorId;
-    /** @var ?Author */
-    public Author $author;
+    /** @var Author|null */
+    public ?Author $author;
 
     /** @var bool */
     protected bool $isAuthorLoaded = false;

@@ -8,6 +8,8 @@ $dispatcher = FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r) {
     $r->addRoute('GET', '/api/v1/healthcheck', 'healthcheck');
 
     $r->addRoute('GET', '/author/{id:\d+}', 'get_author_handler');
+
+    $r->addRoute('GET', '/book/{id:\d+}', 'get_book_handler');
 });
 
 // Strip query string (?foo=bar) and decode URI
@@ -39,6 +41,9 @@ switch ($routeInfo[0]) {
                 break;
             case 'get_author_handler':
                 $response = (new LibraryCatalog\Controller\V1\Author($container))->getOneHandler($uri, $vars['id']);
+                break;
+            case 'get_book_handler':
+                $response = (new LibraryCatalog\Controller\V1\Book($container))->getOneHandler($uri, $vars['id']);
                 break;
         }
         break;

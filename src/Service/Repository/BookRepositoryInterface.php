@@ -10,9 +10,10 @@ interface BookRepositoryInterface
 {
     /**
      * @param mixed $id
+     * @param bool $withAuthor
      * @return Book|null
      */
-    public function load($id): ?Book;
+    public function load($id, bool $withAuthor = false): ?Book;
 
     /**
      * @param mixed $authorId

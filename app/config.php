@@ -21,6 +21,13 @@ return [
             getenv('MYSQL_PASSWORD'),
             getenv('MYSQL_DBNAME'),
             ),
+    'BookRepositoryRedis' => \Di\create(LibraryCatalog\Infrastructure\Persistence\BookRepositoryRedis::class)
+        ->constructor(
+            \Di\get('BookRepositoryPdo'),
+            \Di\get('Serializer'),
+            getenv('REDIS_PARAMS'),
+            '1'
+        ),
     'BookRepositoryPdo' => \Di\create(LibraryCatalog\Infrastructure\Persistence\BookRepositoryPdo::class)
         ->constructor(
             \Di\get('Serializer'),
@@ -32,6 +39,6 @@ return [
     'Catalogue' => \DI\create(LibraryCatalog\Service\Catalogue::class)
         ->constructor(
             \Di\get('AuthorRepositoryRedis'),
-            \Di\get('BookRepositoryPdo'),
+            \Di\get('BookRepositoryRedis'),
         )
 ];

@@ -4,26 +4,26 @@ declare(strict_types=1);
 
 namespace LibraryCatalog\Infrastructure\Persistence;
 
-use LibraryCatalog\Entity\Author;
-use LibraryCatalog\Service\Repository\AuthorRepositoryInterface;
+use LibraryCatalog\Entity\Book;
+use LibraryCatalog\Service\Repository\BookRepositoryInterface;
 use LibraryCatalog\Service\Repository\SerializerTrait;
 use LibraryCatalog\Service\Repository\WarmRepositoryInterface;
 use LibraryCatalog\Transformer\Serializer;
 use Predis\Client;
 
-class AuthorRepositoryRedis implements AuthorRepositoryInterface, WarmRepositoryInterface
+class BookRepositoryRedis implements BookRepositoryInterface, WarmRepositoryInterface
 {
     use SerializerTrait;
 
-    /** @var AuthorRepositoryInterface|null */
-    protected ?AuthorRepositoryInterface $parentRepository;
+    /** @var BookRepositoryInterface|null */
+    protected ?BookRepositoryInterface $parentRepository;
     /** @var Client */
     protected Client $client;
     /** @var string */
     protected string $keyPrefix;
 
     public function __construct(
-        ?AuthorRepositoryInterface $parentRepository,
+        ?BookRepositoryInterface $parentRepository,
         Serializer $serializer,
         string $redisParams,
         string $versionPrefix
@@ -36,39 +36,39 @@ class AuthorRepositoryRedis implements AuthorRepositoryInterface, WarmRepository
 
     /**
      * @param mixed $id
-     * @param bool $withBooks
-     * @return Author|null
+     * @param bool $withAuthor
+     * @return Book|null
      * @throws Serializer\Exception
      * @throws Serializer\HydrateException
      * @throws \LibraryCatalog\Transformer\Encoder\Exception
      */
-    public function load($id, bool $withBooks = false): ?Author
+    public function load($id, bool $withAuthor = false): ?Book
     {
         if ($id == '') {
-            $author = null;
+            $book = null;
         } else {
-            $data = $this->client->get($this->formatKey($id, $withBooks));
-            if ($withBooks && !$data) {
-                // Try to load from cache but without books.
+            $data = $this->client->get($this->formatKey($id, $withAuthor));
+            if ($withAuthor && !$data) {
+                // Try to load from cache but without author.
                 $data = $this->client->get($this->formatKey($id, false));
                 $wasReloaded = true;
             }
 
-            $author = $this->deserialize($data, Author::class);
+            $book = $this->deserialize($data, Book::class);
 
-            if ($withBooks && !isset($wasReloaded) && $author) {
+            if ($withAuthor && !isset($wasReloaded) && $book) {
                 // It means we got books from cache also, should mark in the entity.
-                $author->setBooks($author->books);
+                $book->setAuthor($book->author);
             }
         }
 
-        if (!$author && $this->parentRepository) {
+        if (!$book && $this->parentRepository) {
             // We use parent Repository (usually DB) if data is not present or has invalidated by prefix.
-            $author = $this->parentRepository->load($id);
+            $book = $this->parentRepository->load($id);
             // And after that we can warm our temporary-storage.
-            if ($author) {
+            if ($book) {
                 try {
-                    $this->save($author);
+                    $this->save($book);
                 } catch (\LibraryCatalog\Service\Repository\Exception $e) {
                     // @todo Log
                     // Return result as we can live with parent storage only.
@@ -76,26 +76,36 @@ class AuthorRepositoryRedis implements AuthorRepositoryInterface, WarmRepository
             }
         }
 
-        return $author;
+        return $book;
     }
 
     /**
-     * @param Author $author
+     * @param Book $book
      * @return void
      * @throws Serializer\HydrateException
      * @throws \LibraryCatalog\Transformer\Encoder\Exception
      * @throws \LibraryCatalog\Service\Repository\Exception
      */
-    public function save(Author $author): void
+    public function save(Book $book): void
     {
-        if ($author->id) {
+        if ($book->id) {
             if (!$this->client->set(
-                $this->formatKey($author->id, $author->areBooksLoaded()),
-                $this->serializer->serialize($author)
+                $this->formatKey($book->id, $book->isAuthorLoaded()),
+                $this->serializer->serialize($book)
             )) {
-                throw new \LibraryCatalog\Service\Repository\Exception("Can not save Author to the Redis");
+                throw new \LibraryCatalog\Service\Repository\Exception("Can not save Book to the Redis");
             }
         }
+    }
+
+    /**
+     * @param mixed $authorId
+     * @return Book[]
+     */
+    public function loadByAuthorId($authorId): array
+    {
+        // As a cache repository it does not search.
+        return $this->parentRepository->loadByAuthorId($authorId);
     }
 
     /**
@@ -105,7 +115,7 @@ class AuthorRepositoryRedis implements AuthorRepositoryInterface, WarmRepository
      */
     protected function formatKey($id, bool $withIncludes): string
     {
-        $res = $this->keyPrefix . 'author-';
+        $res = $this->keyPrefix . 'book-';
         if ($withIncludes) {
             $res .= 'wi-';
         }
