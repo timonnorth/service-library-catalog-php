@@ -34,7 +34,7 @@ class Author extends AbstractController
     public function postOneHandler(string $uri, array $params): ResponseInterface
     {
         $validator = new Validator();
-        $validation = $validator->make($params, [
+        $validation = $validator->validate($params, [
             'name'                  => 'required|min:3|max:255',
             'birthdate'             => 'required|date',
             'deathdate'             => 'date',
@@ -42,9 +42,8 @@ class Author extends AbstractController
             'summary'               => 'max:65534',
         ]);
 
-        $validation->validate();
         if ($validation->fails()) {
-            $response = $this->validationError($uri, $validation->errors()->all());
+            $response = $this->validationError($uri, $validation->errors()->firstOfAll());
         } else {
             $author = $this->container->get('Serializer')->hydrate($params, AuthorEnity::class);
             $this->container->get('Catalogue')->createAuthor($author);
