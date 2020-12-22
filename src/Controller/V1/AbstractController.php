@@ -6,6 +6,7 @@ namespace LibraryCatalog\Controller\V1;
 
 use DI\Container;
 use LibraryCatalog\Controller\V1\ValueObject\Error as ErrorDto;
+use LibraryCatalog\Controller\V1\ValueObject\ErrorWithValidation;
 use LibraryCatalog\Controller\V1\ValueObject\Status;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use Psr\Http\Message\ResponseInterface;
@@ -51,6 +52,36 @@ abstract class AbstractController
 
     /**
      * @param string $uri
+     * @param string $message
+     * @param string $code
+     * @return ResponseInterface
+     * @throws \DI\DependencyException
+     * @throws \DI\NotFoundException
+     */
+    public function badRequestError(string $uri, string $message = 'Bad request', string $code = ''): ResponseInterface
+    {
+        return $this->error($uri, 400, $message, $code);
+    }
+
+    /**
+     * @param string $uri
+     * @param array $fields
+     * @param string $code
+     * @return ResponseInterface
+     * @throws \DI\DependencyException
+     * @throws \DI\NotFoundException
+     */
+    public function validationError(string $uri, array $fields, string $code = ''): ResponseInterface
+    {
+        return $this->responseFactory->createResponse(400)->withBody(
+            $this->responseFactory->createStream(
+                $this->serialize(ErrorWithValidation::create('Validation error', $code)->withFields($fields))
+            )
+        );
+    }
+
+    /**
+     * @param string $uri
      * @param int $httpStatusCode
      * @param string $message
      * @param string $code
@@ -58,10 +89,10 @@ abstract class AbstractController
      * @throws \DI\NotFoundException
      * @return ResponseInterface
      */
-    protected function error(string $uri, int $httpStatusCode = 500, string $message = 'Page not found', string $code = ''): ResponseInterface
+    public function error(string $uri, int $httpStatusCode = 500, string $message = 'Page not found', string $code = ''): ResponseInterface
     {
         return $this->responseFactory->createResponse($httpStatusCode)->withBody(
-            $this->responseFactory->createStream($this->serialize(ErrorDto::create($message)))
+            $this->responseFactory->createStream($this->serialize(ErrorDto::create($message, $code)))
         );
     }
 

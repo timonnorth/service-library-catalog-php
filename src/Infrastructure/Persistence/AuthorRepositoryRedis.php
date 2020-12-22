@@ -68,7 +68,7 @@ class AuthorRepositoryRedis implements AuthorRepositoryInterface, WarmRepository
             // And after that we can warm our temporary-storage.
             if ($author) {
                 try {
-                    $this->save($author);
+                    $this->saveInternal($author);
                 } catch (\LibraryCatalog\Service\Repository\Exception $e) {
                     // @todo Log
                     // Return result as we can live with parent storage only.
@@ -81,12 +81,42 @@ class AuthorRepositoryRedis implements AuthorRepositoryInterface, WarmRepository
 
     /**
      * @param Author $author
+     * @throws Serializer\HydrateException
+     * @throws \LibraryCatalog\Service\Repository\Exception
+     * @throws \LibraryCatalog\Transformer\Encoder\Exception
+     */
+    public function save(Author $author): void
+    {
+        // First save to parent repository (DB).
+        if ($this->parentRepository) {
+            $this->parentRepository->save($author);
+        }
+        $this->saveInternal($author);
+    }
+
+    /**
+     * @param object $object
+     * @throws Serializer\HydrateException
+     * @throws \LibraryCatalog\Service\Repository\Exception
+     * @throws \LibraryCatalog\Transformer\Encoder\Exception
+     */
+    public function warm(object $object): void
+    {
+        if ($object instanceof Author) {
+            $this->saveInternal($object);
+        }
+    }
+
+    /**
+     * Saves only in current repository.
+     *
+     * @param Author $author
      * @return void
      * @throws Serializer\HydrateException
      * @throws \LibraryCatalog\Transformer\Encoder\Exception
      * @throws \LibraryCatalog\Service\Repository\Exception
      */
-    public function save(Author $author): void
+    public function saveInternal(Author $author): void
     {
         if ($author->id) {
             if (!$this->client->set(

@@ -68,7 +68,7 @@ class BookRepositoryRedis implements BookRepositoryInterface, WarmRepositoryInte
             // And after that we can warm our temporary-storage.
             if ($book) {
                 try {
-                    $this->save($book);
+                    $this->saveInternal($book);
                 } catch (\LibraryCatalog\Service\Repository\Exception $e) {
                     // @todo Log
                     // Return result as we can live with parent storage only.
@@ -80,13 +80,54 @@ class BookRepositoryRedis implements BookRepositoryInterface, WarmRepositoryInte
     }
 
     /**
+     * @param mixed $authorId
+     * @return Book[]
+     */
+    public function loadByAuthorId($authorId): array
+    {
+        // As a cache repository it does not search.
+        return $this->parentRepository->loadByAuthorId($authorId);
+    }
+
+    /**
+     * @param Book $book
+     * @throws Serializer\HydrateException
+     * @throws \LibraryCatalog\Service\Repository\Exception
+     * @throws \LibraryCatalog\Transformer\Encoder\Exception
+     */
+    public function save(Book $book): void
+    {
+        // First save to parent repository (DB).
+        if ($this->parentRepository) {
+            $this->parentRepository->save($book);
+        }
+        $this->saveInternal($book);
+
+    }
+
+    /**
+     * @param object $object
+     * @throws Serializer\HydrateException
+     * @throws \LibraryCatalog\Service\Repository\Exception
+     * @throws \LibraryCatalog\Transformer\Encoder\Exception
+     */
+    public function warm(object $object): void
+    {
+        if ($object instanceof Book) {
+            $this->saveInternal($object);
+        }
+    }
+
+    /**
+     * Saves only in current repository.
+     *
      * @param Book $book
      * @return void
      * @throws Serializer\HydrateException
      * @throws \LibraryCatalog\Transformer\Encoder\Exception
      * @throws \LibraryCatalog\Service\Repository\Exception
      */
-    public function save(Book $book): void
+    protected function saveInternal(Book $book): void
     {
         if ($book->id) {
             if (!$this->client->set(
@@ -96,16 +137,6 @@ class BookRepositoryRedis implements BookRepositoryInterface, WarmRepositoryInte
                 throw new \LibraryCatalog\Service\Repository\Exception("Can not save Book to the Redis");
             }
         }
-    }
-
-    /**
-     * @param mixed $authorId
-     * @return Book[]
-     */
-    public function loadByAuthorId($authorId): array
-    {
-        // As a cache repository it does not search.
-        return $this->parentRepository->loadByAuthorId($authorId);
     }
 
     /**

@@ -16,7 +16,11 @@ class BookWithAuthor extends Book
     public function transform($data): array
     {
         $res = parent::transform($data);
-        $res['author'] = (new Author())->transform($data->author);
+
+        if (isset($data->author)) {
+            $res['author'] = (new Author())->transform($data->author);
+        }
+
         return $res;
     }
 }

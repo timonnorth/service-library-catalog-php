@@ -21,12 +21,12 @@ class Author implements TransformerInterface
             throw new TransformerException("Tried to transform not an Author");
         }
         return [
-            'id'        => $data->id,
-            'name'      => $data->name,
-            'birthdate' => $data->birthdate,
-            'deathdate' => $data->deathdate,
-            'biography' => $data->biography,
-            'summary'   => $data->summary,
+            'id'        => $data->id ?? null,
+            'name'      => $data->name ?? null,
+            'birthdate' => $data->birthdate ?? null,
+            'deathdate' => $data->deathdate ?? null,
+            'biography' => $data->biography ?? null,
+            'summary'   => $data->summary ?? null,
         ];
     }
 }

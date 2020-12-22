@@ -16,12 +16,16 @@ class AuthorWithBooks extends Author
     public function transform($data): array
     {
         $res = parent::transform($data);
+
         $books = [];
-        $bookTransformer = new Book();
-        foreach ($data->books as $book) {
-            $books[] =  $bookTransformer->transform($book);
+        if (isset($data->books)) {
+            $bookTransformer = new Book();
+            foreach ($data->books as $book) {
+                $books[] = $bookTransformer->transform($book);
+            }
+            $res['books'] = $books;
         }
-        $res['books'] = $books;
+
         return $res;
     }
 }

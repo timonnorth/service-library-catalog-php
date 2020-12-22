@@ -43,7 +43,7 @@ class Catalogue
             $author->setBooks($this->bookRepository->loadByAuthorId($author->id));
             if ($this->authorRepository instanceof WarmRepositoryInterface) {
                 // We can warm cache-repository with books.
-                $this->authorRepository->save($author);
+                $this->authorRepository->warm($author);
             }
         }
         return $author;
@@ -70,7 +70,7 @@ class Catalogue
             $book->setAuthor($this->authorRepository->load($book->authorId));
             if ($this->bookRepository instanceof WarmRepositoryInterface) {
                 // We can warm cache-repository with author.
-                $this->bookRepository->save($book);
+                $this->bookRepository->warm($book);
             }
         }
         return $book;

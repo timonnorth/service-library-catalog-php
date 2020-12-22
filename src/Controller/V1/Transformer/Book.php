@@ -21,9 +21,9 @@ class Book implements TransformerInterface
             throw new TransformerException("Tried to transform not a Book");
         }
         return [
-            'id'      => $data->id,
-            'title'   => $data->title,
-            'summary' => $data->summary,
+            'id'      => $data->id ?? null,
+            'title'   => $data->title ?? null,
+            'summary' => $data->summary ?? null,
         ];
     }
 }
