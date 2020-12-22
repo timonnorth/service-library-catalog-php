@@ -2,9 +2,12 @@
 
 declare(strict_types=1);
 
-namespace LibraryCatalog\Repository;
+namespace LibraryCatalog\Infrastructure\Persistence;
 
 use LibraryCatalog\Entity\Author;
+use LibraryCatalog\Service\Repository\AuthorRepositoryInterface;
+use LibraryCatalog\Service\Repository\Exception;
+use LibraryCatalog\Service\Repository\PdoTrait;
 use LibraryCatalog\Transformer\Serializer;
 
 class AuthorRepositoryPdo implements AuthorRepositoryInterface

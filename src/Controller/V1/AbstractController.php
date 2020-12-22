@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace LibraryCatalog\Controller;
+namespace LibraryCatalog\Controller\V1;
 
 use DI\Container;
-use LibraryCatalog\Controller\ValueObject\Error as ErrorDto;
-use LibraryCatalog\Controller\ValueObject\Status;
+use LibraryCatalog\Controller\V1\ValueObject\Error as ErrorDto;
+use LibraryCatalog\Controller\V1\ValueObject\Status;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use Psr\Http\Message\ResponseInterface;
 

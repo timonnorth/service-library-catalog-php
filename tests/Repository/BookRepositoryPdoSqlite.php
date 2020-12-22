@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Repository;
 
-use LibraryCatalog\Repository\BookRepositoryPdo;
+use LibraryCatalog\Infrastructure\Persistence\BookRepositoryPdo;
 
 class BookRepositoryPdoSqlite extends BookRepositoryPdo
 {

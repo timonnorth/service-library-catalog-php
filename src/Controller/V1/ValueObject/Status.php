@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace LibraryCatalog\Controller\ValueObject;
+namespace LibraryCatalog\Controller\V1\ValueObject;
 
 class Status
 {

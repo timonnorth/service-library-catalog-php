@@ -6,7 +6,7 @@ return [
         ->constructor(new LibraryCatalog\Transformer\Encoder\Json()),
     'Serializer' => \DI\create(LibraryCatalog\Transformer\Serializer::class)
         ->constructor(new LibraryCatalog\Transformer\Encoder\Json()),
-    'AuthorRepositoryPdo' => \Di\create(LibraryCatalog\Repository\AuthorRepositoryPdo::class)
+    'AuthorRepositoryPdo' => \Di\create(LibraryCatalog\Infrastructure\Persistence\AuthorRepositoryPdo::class)
         ->constructor(
             \Di\get('Serializer'),
             getenv('MYSQL_HOST'),
@@ -14,7 +14,7 @@ return [
             getenv('MYSQL_PASSWORD'),
             getenv('MYSQL_DBNAME'),
             ),
-    'BookRepositoryPdo' => \Di\create(LibraryCatalog\Repository\BookRepositoryPdo::class)
+    'BookRepositoryPdo' => \Di\create(LibraryCatalog\Infrastructure\Persistence\BookRepositoryPdo::class)
         ->constructor(
             \Di\get('Serializer'),
             getenv('MYSQL_HOST'),

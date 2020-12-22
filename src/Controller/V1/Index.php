@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace LibraryCatalog\Controller;
+namespace LibraryCatalog\Controller\V1;
 
 use Psr\Http\Message\ResponseInterface;
 

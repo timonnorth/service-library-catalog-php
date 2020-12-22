@@ -6,8 +6,8 @@ namespace LibraryCatalog\Service;
 
 use LibraryCatalog\Entity\Author;
 use LibraryCatalog\Entity\Book;
-use LibraryCatalog\Repository\AuthorRepositoryInterface;
-use LibraryCatalog\Repository\BookRepositoryInterface;
+use LibraryCatalog\Service\Repository\AuthorRepositoryInterface;
+use LibraryCatalog\Service\Repository\BookRepositoryInterface;
 
 class Catalogue
 {

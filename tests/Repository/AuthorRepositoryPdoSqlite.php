@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Repository;
 
-use LibraryCatalog\Repository\AuthorRepositoryPdo;
+use LibraryCatalog\Infrastructure\Persistence\AuthorRepositoryPdo;
 
 class AuthorRepositoryPdoSqlite extends AuthorRepositoryPdo
 {

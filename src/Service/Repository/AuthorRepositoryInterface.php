@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace LibraryCatalog\Repository;
+namespace LibraryCatalog\Service\Repository;
 
 use LibraryCatalog\Entity\Author;
 
