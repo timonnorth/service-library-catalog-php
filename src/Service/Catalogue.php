@@ -36,7 +36,12 @@ class Catalogue
      */
     public function fetchAuthor($id, bool $withBooks = false): ?Author
     {
-        return $this->authorRepository->load($id, $withBooks);
+        $author = $this->authorRepository->load($id);
+        if ($author && $withBooks && !$author->areBooksLoaded()) {
+            // Load and set books for Author.
+            $author->setBooks($this->bookRepository->loadByAuthorId($author->id));
+        }
+        return $author;
     }
 
     /**
@@ -49,11 +54,17 @@ class Catalogue
 
     /**
      * @param $id
+     * @param bool $withAuthor
      * @return Book|null
      */
-    public function fetchBook($id): ?Book
+    public function fetchBook($id, bool $withAuthor = false): ?Book
     {
-        return $this->bookRepository->load($id);
+        $book = $this->bookRepository->load($id);
+        if ($book && $withAuthor && !$book->isAuthorLoaded()) {
+            // Load and set author for book.
+            $book->setAuthor($this->authorRepository->load($book->authorId));
+        }
+        return $book;
     }
 
     /**

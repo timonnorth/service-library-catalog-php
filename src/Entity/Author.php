@@ -53,7 +53,7 @@ class Author
     /**
      * @return bool
      */
-    public function arBooksLoaded(): bool
+    public function areBooksLoaded(): bool
     {
         return $this->areBooksLoaded;
     }

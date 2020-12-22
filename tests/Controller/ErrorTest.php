@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\Transformer;
+namespace Tests\Controller;
 
 class ErrorTest extends \PHPUnit\Framework\TestCase
 {

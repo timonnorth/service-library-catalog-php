@@ -10,7 +10,7 @@ return [
     'Serializer' => \DI\create(LibraryCatalog\Transformer\Serializer::class)
         ->constructor(new LibraryCatalog\Transformer\Encoder\Json()),
     'AuthorRepository' => \Di\create(Repository\AuthorRepositoryPdoSqlite::class)
-        ->constructor(\Di\get('BookRepository'), \Di\get('Serializer'), "", "", "", ""),
+        ->constructor(\Di\get('Serializer'), "", "", "", ""),
     'BookRepository' => \Di\create(Repository\BookRepositoryPdoSqlite::class)
         ->constructor(\Di\get('Serializer'), "", "", "", ""),
     'Catalogue' => \DI\create(LibraryCatalog\Service\Catalogue::class)

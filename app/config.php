@@ -8,7 +8,6 @@ return [
         ->constructor(new LibraryCatalog\Transformer\Encoder\Json()),
     'AuthorRepositoryPdo' => \Di\create(LibraryCatalog\Repository\AuthorRepositoryPdo::class)
         ->constructor(
-            \Di\get('BookRepositoryPdo'),
             \Di\get('Serializer'),
             getenv('MYSQL_HOST'),
             getenv('MYSQL_USER'),

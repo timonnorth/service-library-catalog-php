@@ -15,8 +15,6 @@ class AuthorRepositoryPdo implements AuthorRepositoryInterface
 
     /** @var Serializer */
     protected Serializer $serializer;
-    /** @var BookRepositoryInterface $bookRepository */
-    protected BookRepositoryInterface $bookRepository;
 
     /**
      * AuthorRepositoryPdo constructor.
@@ -26,36 +24,22 @@ class AuthorRepositoryPdo implements AuthorRepositoryInterface
      * @param string $password
      * @param string $dbname
      */
-    public function __construct(
-        BookRepositoryInterface $bookRepository,
-        Serializer $serializer,
-        string $host,
-        string $user,
-        string $password,
-        string $dbname
-    ) {
+    public function __construct(Serializer $serializer, string $host, string $user, string $password, string $dbname)
+    {
         $this->prepareConnection($host, $user, $password, $dbname);
-        $this->bookRepository = $bookRepository;
         $this->serializer = $serializer;
     }
 
     /**
      * @param mixed $id
-     * @param bool $withBooks
      * @return Author|null
      * @throws Exception
      * @throws Serializer\HydrateException
      */
-    public function load($id, bool $withBooks = false): ?Author
+    public function load($id): ?Author
     {
         $data = $this->fetchOne(static::TABLE_NAME, $id);
-        /** @var Author $author */
-        $author = $data ? $this->serializer->hydrate($data, Author::class) : null;
-        if ($author && $withBooks && !$author->arBooksLoaded()) {
-            // Load and set books for Author.
-            $author->setBooks($this->bookRepository->loadByAuthorId($author->id));
-        }
-        return $author;
+        return $data ? $this->serializer->hydrate($data, Author::class) : null;
     }
 
     /**

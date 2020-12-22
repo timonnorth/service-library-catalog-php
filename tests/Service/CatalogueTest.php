@@ -86,6 +86,15 @@ class CatalogueTest extends TestCase
         self::assertJsonStringEqualsJsonString(json_encode($dataExpected), $this->getSerializer()->serialize($author));
     }
 
+    public function testFetchBookWithAuthor()
+    {
+        $bookExpected = $this->createBook2(2);
+        $book = $this->getCatalogue()->fetchBook(2, true);
+        $dataExpected = json_decode($this->getSerializer()->serialize($bookExpected), true);
+        $dataExpected['author'] = json_decode($this->getSerializer()->serialize($this->createAuthor1('2')), true);
+        self::assertJsonStringEqualsJsonString(json_encode($dataExpected), $this->getSerializer()->serialize($book));
+    }
+
     /**
      * @return Catalogue
      * @throws \DI\DependencyException

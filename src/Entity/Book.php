@@ -14,6 +14,11 @@ class Book
     public ?string $summary;
     /** @var mixed */
     public $authorId;
+    /** @var ?Author */
+    public Author $author;
+
+    /** @var bool */
+    protected bool $isAuthorLoaded = false;
 
     /**
      * @param mixed $authorId
@@ -30,5 +35,24 @@ class Book
         $book->summary = $summary;
 
         return $book;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isAuthorLoaded(): bool
+    {
+        return $this->isAuthorLoaded;
+    }
+
+    /**
+     * @param Author $author
+     * @return Book
+     */
+    public function setAuthor(Author $author): Book
+    {
+        $this->author = $author;
+        $this->isAuthorLoaded = true;
+        return $this;
     }
 }
