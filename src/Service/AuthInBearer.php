@@ -6,7 +6,7 @@ namespace LibraryCatalog\Service;
 
 use Psr\Http\Message\RequestInterface;
 
-class AuthInBearer
+class AuthInBearer implements AuthInInterface
 {
     /** @var RequestInterface */
     protected RequestInterface $request;
@@ -30,9 +30,9 @@ class AuthInBearer
 
     /**
      * @param RequestInterface $request
-     * @return AuthInBearer
+     * @return AuthInInterface
      */
-    public function setRequest(RequestInterface $request): AuthInBearer
+    public function setRequest(RequestInterface $request): AuthInInterface
     {
         $this->request = $request;
         $this->parsed = false;

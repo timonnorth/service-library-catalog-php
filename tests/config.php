@@ -20,4 +20,5 @@ return [
         ),
     'AuthIn' => \DI\create(\LibraryCatalog\Service\AuthInBearer::class)
         ->constructor('test_secret'),
+    'Acl' => \DI\create(\LibraryCatalog\Service\Acl::class),
 ];

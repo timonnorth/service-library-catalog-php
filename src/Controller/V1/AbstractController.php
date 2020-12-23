@@ -9,7 +9,8 @@ use LibraryCatalog\Controller\V1\ValueObject\Error as ErrorDto;
 use LibraryCatalog\Controller\V1\ValueObject\ErrorWithValidation;
 use LibraryCatalog\Controller\V1\ValueObject\Status;
 use LibraryCatalog\Exception\HttpUnauthorizedException;
-use LibraryCatalog\Service\AuthInBearer;
+use LibraryCatalog\Service\AclInterface;
+use LibraryCatalog\Service\AuthInInterface;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -44,8 +45,8 @@ abstract class AbstractController
 
         // Check Auth.
         if ($this->needAuth) {
-            /** @var AuthInBearer $auth */
-            $auth = $this->container->get('AuthIn')->setRequest($request);
+            /** @var AuthInInterface $auth */
+            $auth = $this->getAuthIn()->setRequest($request);
             if (!$auth->authenticated()) {
                 throw new HttpUnauthorizedException();
             }
@@ -89,6 +90,19 @@ abstract class AbstractController
     public function badRequestError(string $uri, string $message = 'Bad request', string $code = ''): ResponseInterface
     {
         return $this->error($uri, 400, $message, $code);
+    }
+
+    /**
+     * @param string $uri
+     * @param string $message
+     * @param string $code
+     * @return ResponseInterface
+     * @throws \DI\DependencyException
+     * @throws \DI\NotFoundException
+     */
+    public function forbiddenError(string $uri, string $message = 'Forbidden', string $code = ''): ResponseInterface
+    {
+        return $this->error($uri, 403, $message, $code);
     }
 
     /**
@@ -170,5 +184,25 @@ abstract class AbstractController
     protected function serialize($data): string
     {
         return $this->container->get('HttpTransformer')->serialize($data);
+    }
+
+    /**
+     * @return AclInterface
+     * @throws \DI\DependencyException
+     * @throws \DI\NotFoundException
+     */
+    protected function getAcl(): AclInterface
+    {
+        return $this->container->get('Acl');
+    }
+
+    /**
+     * @return AuthInInterface
+     * @throws \DI\DependencyException
+     * @throws \DI\NotFoundException
+     */
+    public function getAuthIn(): AuthInInterface
+    {
+        return $this->container->get('AuthIn');
     }
 }

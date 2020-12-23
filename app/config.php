@@ -43,4 +43,5 @@ return [
         ),
     'AuthIn' => \DI\create(\LibraryCatalog\Service\AuthInBearer::class)
         ->constructor(getenv('AUTH_SECRET')),
+    'Acl' => \DI\create(\LibraryCatalog\Service\Acl::class),
 ];
