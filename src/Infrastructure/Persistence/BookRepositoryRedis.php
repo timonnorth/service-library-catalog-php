@@ -116,6 +116,28 @@ class BookRepositoryRedis implements BookRepositoryInterface, WarmRepositoryInte
         if ($object instanceof Book) {
             $this->saveInternal($object);
         }
+        if ($this->parentRepository instanceof WarmRepositoryInterface) {
+            $this->parentRepository->warm($object);
+        }
+    }
+
+    /**
+     * @param mixed $id
+     * @throws \LibraryCatalog\Service\Repository\Exception
+     */
+    public function reset($id): void
+    {
+        if ($id != '') {
+            if (!$this->client->del([
+                $this->formatKey($id, true),
+                $this->formatKey($id, false),
+            ])) {
+                throw new \LibraryCatalog\Service\Repository\Exception("Can not reset Book in the Redis");
+            }
+            if ($this->parentRepository instanceof WarmRepositoryInterface) {
+                $this->parentRepository->reset($id);
+            }
+        }
     }
 
     /**

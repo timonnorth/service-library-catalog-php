@@ -8,7 +8,10 @@ use DI\Container;
 use LibraryCatalog\Controller\V1\ValueObject\Error as ErrorDto;
 use LibraryCatalog\Controller\V1\ValueObject\ErrorWithValidation;
 use LibraryCatalog\Controller\V1\ValueObject\Status;
+use LibraryCatalog\Exception\HttpUnauthorizedException;
+use LibraryCatalog\Service\AuthInBearer;
 use Nyholm\Psr7\Factory\Psr17Factory;
+use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 
 abstract class AbstractController
@@ -17,11 +20,36 @@ abstract class AbstractController
     protected Container $container;
     /** @var Psr17Factory */
     protected Psr17Factory $responseFactory;
+    /** @var RequestInterface */
+    protected RequestInterface $request;
+    /**
+     * You can change this value in your controller.
+     * @var bool
+     */
+    protected bool $needAuth = true;
 
-    public function __construct(Container $container)
+    /**
+     * AbstractController constructor.
+     * @param Container $container
+     * @param RequestInterface $request
+     * @throws HttpUnauthorizedException
+     * @throws \DI\DependencyException
+     * @throws \DI\NotFoundException
+     */
+    public function __construct(Container $container, RequestInterface $request)
     {
         $this->container = $container;
         $this->responseFactory = new \Nyholm\Psr7\Factory\Psr17Factory();
+        $this->request = $request;
+
+        // Check Auth.
+        if ($this->needAuth) {
+            /** @var AuthInBearer $auth */
+            $auth = $this->container->get('AuthIn')->setRequest($request);
+            if (!$auth->authenticated()) {
+                throw new HttpUnauthorizedException();
+            }
+        }
     }
 
     /**
@@ -61,6 +89,19 @@ abstract class AbstractController
     public function badRequestError(string $uri, string $message = 'Bad request', string $code = ''): ResponseInterface
     {
         return $this->error($uri, 400, $message, $code);
+    }
+
+    /**
+     * @param string $uri
+     * @param string $message
+     * @param string $code
+     * @return ResponseInterface
+     * @throws \DI\DependencyException
+     * @throws \DI\NotFoundException
+     */
+    public function unauthorizedError(string $uri, string $message = 'Unauthorized', string $code = ''): ResponseInterface
+    {
+        return $this->error($uri, 401, $message, $code);
     }
 
     /**

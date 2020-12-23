@@ -82,5 +82,17 @@ class Catalogue
     public function createBook(Book $book): void
     {
         $this->bookRepository->save($book);
+        if ($this->authorRepository instanceof WarmRepositoryInterface) {
+            // We reset author in warm cache-repository (as he should have to reload books).
+            $this->authorRepository->reset($book->authorId);
+        }
+    }
+
+    /**
+     * @return AuthorRepositoryInterface
+     */
+    public function getAuthorRepository(): AuthorRepositoryInterface
+    {
+        return $this->authorRepository;
     }
 }

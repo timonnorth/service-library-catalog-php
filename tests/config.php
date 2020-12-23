@@ -17,5 +17,7 @@ return [
         ->constructor(
             \Di\get('AuthorRepository'),
             \Di\get('BookRepository'),
-        )
+        ),
+    'AuthIn' => \DI\create(\LibraryCatalog\Service\AuthInBearer::class)
+        ->constructor('test_secret'),
 ];

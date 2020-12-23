@@ -8,6 +8,9 @@ use Psr\Http\Message\ResponseInterface;
 
 class Index extends AbstractController
 {
+    /** @var bool */
+    protected bool $needAuth = false;
+
     /**
      * @return ResponseInterface
      * @throws \DI\DependencyException

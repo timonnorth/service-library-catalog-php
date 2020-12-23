@@ -47,6 +47,19 @@ class AuthorRepositoryPdo implements AuthorRepositoryInterface
     }
 
     /**
+     * @param string $name
+     * @param string $birthdate
+     * @return Author|null
+     * @throws Exception
+     * @throws Serializer\HydrateException
+     */
+    public function loadByNameBirthdate(string $name, string $birthdate): ?Author
+    {
+        $data = $this->fetchList(static::TABLE_NAME, 'name = ? and birthdate = ?', [$name, $birthdate], 1);
+        return count($data) >= 1 ? $this->serializer->hydrate($data[0], Author::class) : null;
+    }
+
+    /**
      * @param Author $author
      * @return void
      * @throws Exception

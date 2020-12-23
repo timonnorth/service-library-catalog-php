@@ -38,6 +38,24 @@ class Book
     }
 
     /**
+     * @param array $data
+     * @return Book
+     */
+    public function fill(array $data): Book
+    {
+        if (isset($data['title'])) {
+            $this->title = (string)$data['title'];
+        }
+        if (isset($data['summary'])) {
+            $this->summary = (string)$data['summary'];
+        }
+        if (isset($data['authorId'])) {
+            $this->authorId = $data['authorId'];
+        }
+        return $this;
+    }
+
+    /**
      * @return bool
      */
     public function isAuthorLoaded(): bool

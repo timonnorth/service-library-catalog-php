@@ -51,6 +51,30 @@ class Author
     }
 
     /**
+     * @param array $data
+     * @return Author
+     */
+    public function fill(array $data): Author
+    {
+        if (isset($data['name'])) {
+            $this->name = (string)$data['name'];
+        }
+        if (isset($data['birthdate'])) {
+            $this->birthdate = (string)$data['birthdate'];
+        }
+        if (isset($data['deathdate'])) {
+            $this->deathdate = (string)$data['deathdate'];
+        }
+        if (isset($data['biography'])) {
+            $this->biography = (string)$data['biography'];
+        }
+        if (isset($data['summary'])) {
+            $this->summary = (string)$data['summary'];
+        }
+        return $this;
+    }
+
+    /**
      * @return bool
      */
     public function areBooksLoaded(): bool

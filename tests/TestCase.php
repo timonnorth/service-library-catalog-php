@@ -48,12 +48,16 @@ class TestCase extends \PHPUnit\Framework\TestCase
     /**
      * @param string $httpMethod
      * @param string $uri
+     * @param string $auth;
      * @return ResponseInterface
      * @throws \Exception
      */
-    protected function route(string $httpMethod, string $uri): ResponseInterface
+    protected function route(string $httpMethod, string $uri, string $auth = ''): ResponseInterface
     {
         $container = $this->getContainer();
+        if ($auth != '') {
+            $_SERVER['HTTP_AUTHORIZATION'] = $auth;
+        }
         include __APPDIR__ . "/app/routing.php";
         return $response;
     }
@@ -79,6 +83,20 @@ class TestCase extends \PHPUnit\Framework\TestCase
                 throw new \Exception(json_encode($this->pdo()->errorInfo()));
             }
         }
+    }
+
+    /**
+     * Get Auth string. Do it before controller/action.
+     *
+     * @param string $payload
+     * @param string $secret
+     * @throws \DI\DependencyException
+     * @throws \DI\NotFoundException
+     * @return string
+     */
+    protected function getAuthorization(string $payload, string $secret = 'test_secret'): string
+    {
+        return 'Bearer ' . base64_encode(json_encode(['secret' => $secret, 'payload' => $payload]));
     }
 
     /**

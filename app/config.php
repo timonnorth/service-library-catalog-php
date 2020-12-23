@@ -40,5 +40,7 @@ return [
         ->constructor(
             \Di\get('AuthorRepositoryRedis'),
             \Di\get('BookRepositoryRedis'),
-        )
+        ),
+    'AuthIn' => \DI\create(\LibraryCatalog\Service\AuthInBearer::class)
+        ->constructor(getenv('AUTH_SECRET')),
 ];

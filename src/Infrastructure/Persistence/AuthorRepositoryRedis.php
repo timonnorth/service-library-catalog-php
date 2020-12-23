@@ -80,6 +80,20 @@ class AuthorRepositoryRedis implements AuthorRepositoryInterface, WarmRepository
     }
 
     /**
+     * @param string $name
+     * @param string $birthdate
+     * @return Author|null
+     */
+    public function loadByNameBirthdate(string $name, string $birthdate): ?Author
+    {
+        $res = null;
+        if ($this->parentRepository) {
+            $res = $this->parentRepository->loadByNameBirthdate($name, $birthdate);
+        }
+        return $res;
+    }
+
+    /**
      * @param Author $author
      * @throws Serializer\HydrateException
      * @throws \LibraryCatalog\Service\Repository\Exception
@@ -104,6 +118,28 @@ class AuthorRepositoryRedis implements AuthorRepositoryInterface, WarmRepository
     {
         if ($object instanceof Author) {
             $this->saveInternal($object);
+        }
+        if ($this->parentRepository instanceof WarmRepositoryInterface) {
+            $this->parentRepository->warm($object);
+        }
+    }
+
+    /**
+     * @param mixed $id
+     * @throws \LibraryCatalog\Service\Repository\Exception
+     */
+    public function reset($id): void
+    {
+        if ($id != '') {
+            if (!$this->client->del([
+                $this->formatKey($id, true),
+                $this->formatKey($id, false),
+            ])) {
+                throw new \LibraryCatalog\Service\Repository\Exception("Can not reset Author in the Redis");
+            }
+            if ($this->parentRepository instanceof WarmRepositoryInterface) {
+                $this->parentRepository->reset($id);
+            }
         }
     }
 

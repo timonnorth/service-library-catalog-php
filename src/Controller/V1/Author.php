@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace LibraryCatalog\Controller\V1;
 
+use LibraryCatalog\Service\Catalogue;
+use LibraryCatalog\Service\Validation\Rule\AuthorUniqueName;
 use Psr\Http\Message\ResponseInterface;
 use LibraryCatalog\Controller\V1\Transformer\AuthorWithBooks as AuthorTransformer;
-use LibraryCatalog\Entity\Author as AuthorEnity;
+use LibraryCatalog\Entity\Author as AuthorEntity;
 use Rakit\Validation\Validator;
 
 class Author extends AbstractController
@@ -21,6 +23,8 @@ class Author extends AbstractController
      */
     public function getOneHandler(string $uri, string $id): ResponseInterface
     {
+
+
         $author = $this->container->get('Catalogue')->fetchAuthor($id, true);
 
         if ($author) {
@@ -31,11 +35,24 @@ class Author extends AbstractController
         return $response;
     }
 
+    /**
+     * @param string $uri
+     * @param array $params
+     * @return ResponseInterface
+     * @throws \DI\DependencyException
+     * @throws \DI\NotFoundException
+     * @throws \LibraryCatalog\Controller\TransformerException
+     * @throws \Rakit\Validation\RuleQuashException
+     */
     public function postOneHandler(string $uri, array $params): ResponseInterface
     {
+        /** @var Catalogue $catalogue */
+        $catalogue = $this->container->get('Catalogue');
+
         $validator = new Validator();
+        $validator->addValidator('uniqueAuthor', new AuthorUniqueName($catalogue->getAuthorRepository(), $params['birthdate'] ?? ''));
         $validation = $validator->validate($params, [
-            'name'                  => 'required|min:3|max:255',
+            'name'                  => 'required|min:3|max:255|uniqueAuthor',
             'birthdate'             => 'required|date',
             'deathdate'             => 'date',
             'biography'             => 'max:65534',
@@ -45,8 +62,8 @@ class Author extends AbstractController
         if ($validation->fails()) {
             $response = $this->validationError($uri, $validation->errors()->firstOfAll());
         } else {
-            $author = $this->container->get('Serializer')->hydrate($params, AuthorEnity::class);
-            $this->container->get('Catalogue')->createAuthor($author);
+            $author = (new AuthorEntity())->fill($params);
+            $catalogue->createAuthor($author);
             $response = $this->createResponse((new AuthorTransformer())->transform($author));
         }
 

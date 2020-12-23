@@ -18,9 +18,20 @@ class AuthorTest extends TestCase
         $this->runDbMigration();
     }
 
-    public function testAuthorNotFound()
+    public function testNotAuthed()
     {
         $response = $this->route('GET', '/author/122');
+
+        self::assertEquals(401, $response->getStatusCode());
+        self::assertJsonStringEqualsJsonString(
+            '{"message":"Unauthorized","code":""}',
+            (string)$response->getBody()
+        );
+    }
+
+    public function testAuthorNotFound()
+    {
+        $response = $this->route('GET', '/author/122', $this->getAuthorization('3'));
 
         self::assertEquals(404, $response->getStatusCode());
         self::assertJsonStringEqualsJsonString(
