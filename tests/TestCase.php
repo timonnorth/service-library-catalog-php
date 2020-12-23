@@ -118,4 +118,17 @@ class TestCase extends \PHPUnit\Framework\TestCase
     {
         return $this->getContainer()->get('Serializer');
     }
+
+    /**
+     * @param string|array $body
+     * @throws \DI\DependencyException
+     * @throws \DI\NotFoundException
+     */
+    protected function setRawInput($body)
+    {
+        if (is_array($body)) {
+            $body = json_encode($body);
+        }
+        $this->container->get('RawInput')->set($body);
+    }
 }

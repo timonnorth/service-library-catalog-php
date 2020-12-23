@@ -59,7 +59,7 @@ switch ($routeInfo[0]) {
                 case 'post_author_handler':
                     $response = (new LibraryCatalog\Controller\V1\Author($container, $request))->postOneHandler(
                         $uri,
-                        $container->get('HttpTransformer')->deserialize(file_get_contents('php://input')),
+                        $container->get('HttpTransformer')->deserialize($container->get('RawInput')->get()),
                     );
                     break;
 
@@ -69,7 +69,7 @@ switch ($routeInfo[0]) {
                 case 'post_book_handler':
                     $response = (new LibraryCatalog\Controller\V1\Book($container, $request))->postOneHandler(
                         $uri,
-                        $container->get('HttpTransformer')->deserialize(file_get_contents('php://input')),
+                        $container->get('HttpTransformer')->deserialize($container->get('RawInput')->get()),
                         );
                     break;
             }

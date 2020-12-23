@@ -201,7 +201,7 @@ abstract class AbstractController
      * @throws \DI\DependencyException
      * @throws \DI\NotFoundException
      */
-    public function getAuthIn(): AuthInInterface
+    protected function getAuthIn(): AuthInInterface
     {
         return $this->container->get('AuthIn');
     }

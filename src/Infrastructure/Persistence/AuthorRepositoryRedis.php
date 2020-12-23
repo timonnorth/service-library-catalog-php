@@ -131,10 +131,12 @@ class AuthorRepositoryRedis implements AuthorRepositoryInterface, WarmRepository
     public function reset($id): void
     {
         if ($id != '') {
-            if (!$this->client->del([
+            if (
+                !$this->client->del([
                 $this->formatKey($id, true),
                 $this->formatKey($id, false),
-            ])) {
+                ])
+            ) {
                 throw new \LibraryCatalog\Service\Repository\Exception("Can not reset Author in the Redis");
             }
             if ($this->parentRepository instanceof WarmRepositoryInterface) {
@@ -155,10 +157,12 @@ class AuthorRepositoryRedis implements AuthorRepositoryInterface, WarmRepository
     public function saveInternal(Author $author): void
     {
         if ($author->id) {
-            if (!$this->client->set(
-                $this->formatKey($author->id, $author->areBooksLoaded()),
-                $this->serializer->serialize($author)
-            )) {
+            if (
+                !$this->client->set(
+                    $this->formatKey($author->id, $author->areBooksLoaded()),
+                    $this->serializer->serialize($author)
+                )
+            ) {
                 throw new \LibraryCatalog\Service\Repository\Exception("Can not save Author to the Redis");
             }
         }

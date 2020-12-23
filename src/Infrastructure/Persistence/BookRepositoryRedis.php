@@ -102,7 +102,6 @@ class BookRepositoryRedis implements BookRepositoryInterface, WarmRepositoryInte
             $this->parentRepository->save($book);
         }
         $this->saveInternal($book);
-
     }
 
     /**
@@ -128,10 +127,12 @@ class BookRepositoryRedis implements BookRepositoryInterface, WarmRepositoryInte
     public function reset($id): void
     {
         if ($id != '') {
-            if (!$this->client->del([
+            if (
+                !$this->client->del([
                 $this->formatKey($id, true),
                 $this->formatKey($id, false),
-            ])) {
+                ])
+            ) {
                 throw new \LibraryCatalog\Service\Repository\Exception("Can not reset Book in the Redis");
             }
             if ($this->parentRepository instanceof WarmRepositoryInterface) {
@@ -152,10 +153,12 @@ class BookRepositoryRedis implements BookRepositoryInterface, WarmRepositoryInte
     protected function saveInternal(Book $book): void
     {
         if ($book->id) {
-            if (!$this->client->set(
-                $this->formatKey($book->id, $book->isAuthorLoaded()),
-                $this->serializer->serialize($book)
-            )) {
+            if (
+                !$this->client->set(
+                    $this->formatKey($book->id, $book->isAuthorLoaded()),
+                    $this->serializer->serialize($book)
+                )
+            ) {
                 throw new \LibraryCatalog\Service\Repository\Exception("Can not save Book to the Redis");
             }
         }

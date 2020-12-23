@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace LibraryCatalog\Controller\V1;
 
 use LibraryCatalog\Controller\TransformerException;
+use LibraryCatalog\Service\Acl;
 use LibraryCatalog\Service\Catalogue;
 use LibraryCatalog\Service\Validation\Rule\AuthorExists;
 use Psr\Http\Message\ResponseInterface;
@@ -25,6 +26,17 @@ class Book extends AbstractController
      */
     public function getOneHandler(string $uri, string $id): ResponseInterface
     {
+        // Check ACL first.
+        if (
+            !$this->getAcl()->isAllowed(
+                $this->getAcl()->parseUserPayload($this->getAuthIn()->getPayload()),
+                Acl::BOOK,
+                Acl::READ
+            )
+        ) {
+            return $this->forbiddenError($uri);
+        }
+
         $book = $this->container->get('Catalogue')->fetchBook($id, true);
 
         if ($book) {
@@ -46,6 +58,17 @@ class Book extends AbstractController
      */
     public function postOneHandler(string $uri, array $params): ResponseInterface
     {
+        // Check ACL first.
+        if (
+            !$this->getAcl()->isAllowed(
+                $this->getAcl()->parseUserPayload($this->getAuthIn()->getPayload()),
+                Acl::BOOK,
+                Acl::ADD
+            )
+        ) {
+            return $this->forbiddenError($uri);
+        }
+
         /** @var Catalogue $catalogue */
         $catalogue = $this->container->get('Catalogue');
 

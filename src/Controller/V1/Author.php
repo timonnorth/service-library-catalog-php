@@ -26,20 +26,23 @@ class Author extends AbstractController
      */
     public function getOneHandler(string $uri, string $id): ResponseInterface
     {
-        if ($this->getAcl()->isAllowed(
-            $this->getAcl()->parseUserPayload($this->getAuthIn()->getPayload()),
-            Acl::AUTHOR,
-            Acl::READ
-        )) {
-            $author = $this->container->get('Catalogue')->fetchAuthor($id, true);
+        // Check ACL first.
+        if (
+            !$this->getAcl()->isAllowed(
+                $this->getAcl()->parseUserPayload($this->getAuthIn()->getPayload()),
+                Acl::AUTHOR,
+                Acl::READ
+            )
+        ) {
+            return $this->forbiddenError($uri);
+        }
 
-            if ($author) {
-                $response = $this->createResponse((new AuthorTransformer())->transform($author));
-            } else {
-                $response = $this->notFoundError($uri, 'Author not found');
-            }
+        $author = $this->container->get('Catalogue')->fetchAuthor($id, true);
+
+        if ($author) {
+            $response = $this->createResponse((new AuthorTransformer())->transform($author));
         } else {
-            $response = $this->forbiddenError($uri);
+            $response = $this->notFoundError($uri, 'Author not found');
         }
 
         return $response;
@@ -56,6 +59,17 @@ class Author extends AbstractController
      */
     public function postOneHandler(string $uri, array $params): ResponseInterface
     {
+        // Check ACL first.
+        if (
+            !$this->getAcl()->isAllowed(
+                $this->getAcl()->parseUserPayload($this->getAuthIn()->getPayload()),
+                Acl::AUTHOR,
+                Acl::ADD
+            )
+        ) {
+            return $this->forbiddenError($uri);
+        }
+
         /** @var Catalogue $catalogue */
         $catalogue = $this->container->get('Catalogue');
 

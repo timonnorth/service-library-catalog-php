@@ -4,6 +4,7 @@ require_once "Repository/AuthorRepositoryPdoSqlite.php";
 require_once "Repository/BookRepositoryPdoSqlite.php";
 
 return [
+    'RawInput' => \DI\create(\LibraryCatalog\Service\Http\RawInputDummy::class),
     'Json' => \DI\create(LibraryCatalog\Transformer\Encoder\Json::class),
     'HttpTransformer' => \DI\create(LibraryCatalog\Transformer\JsonHttpSerializer::class)
         ->constructor(new LibraryCatalog\Transformer\Encoder\Json()),

@@ -50,4 +50,17 @@ class AuthorTest extends TestCase
             (string)$response->getBody()
         );
     }
+
+    public function testCreateForbidden()
+    {
+        $this->setRawInput([]);
+        $response = $this->route('POST', '/author', $this->getAuthorization('user:3'));
+
+        self::assertEquals(403, $response->getStatusCode());
+        self::assertJsonStringEqualsJsonString(
+            '{"message":"Forbidden","code":""}',
+            (string)$response->getBody()
+        );
+
+    }
 }
