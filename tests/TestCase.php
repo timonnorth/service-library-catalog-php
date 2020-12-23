@@ -54,12 +54,12 @@ class TestCase extends \PHPUnit\Framework\TestCase
      */
     protected function route(string $httpMethod, string $uri, string $auth = ''): ResponseInterface
     {
-        $container = $this->getContainer();
-        if ($auth != '') {
-            $_SERVER['HTTP_AUTHORIZATION'] = $auth;
+        $params = [];
+        if ($auth !== '') {
+            $params['HTTP_AUTHORIZATION'] = $auth;
         }
-        include __APPDIR__ . "/app/routing.php";
-        return $response;
+        $router = new \LibraryCatalog\Service\Http\Router($this->getContainer(), $uri, $httpMethod, $params);
+        return $router->dispatch();
     }
 
     /**
@@ -130,5 +130,14 @@ class TestCase extends \PHPUnit\Framework\TestCase
             $body = json_encode($body);
         }
         $this->container->get('RawInput')->set($body);
+    }
+
+    /**
+     * @param int $length
+     * @return string
+     */
+    protected function generateString(int $length): string
+    {
+        return substr(str_shuffle(str_repeat($x='0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ', (int)ceil($length/strlen($x)) )),1,$length);
     }
 }
