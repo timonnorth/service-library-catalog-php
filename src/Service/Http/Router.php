@@ -10,6 +10,7 @@ use LibraryCatalog\Controller\V1\Author;
 use LibraryCatalog\Controller\V1\Book;
 use LibraryCatalog\Controller\V1\Error;
 use LibraryCatalog\Controller\V1\Index;
+use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 
 class Router
@@ -66,41 +67,8 @@ class Router
                     ->error($this->uri, 405, 'Method not allowed');
                 break;
             case Dispatcher::FOUND:
-                $handler = $routeInfo[1];
-                $vars = $routeInfo[2];
                 try {
-                    switch ($handler) {
-                        case 'index':
-                            $response = (new Index($this->container, $request))->indexAction();
-                            break;
-                        case 'healthcheck':
-                            $response = (new Index($this->container, $request))->healthcheckAction();
-                            break;
-
-                        case 'get_author_handler':
-                            $response = (new Author($this->container, $request))
-                                ->getOneHandler($this->uri, $vars['id']);
-                            break;
-                        case 'post_author_handler':
-                            $response = (new Author($this->container, $request))->postOneHandler(
-                                $this->uri,
-                                $this->container->get('HttpTransformer')
-                                    ->deserialize($this->container->get('RawInput')->get()),
-                            );
-                            break;
-
-                        case 'get_book_handler':
-                            $response = (new Book($this->container, $request))
-                                ->getOneHandler($this->uri, $vars['id']);
-                            break;
-                        case 'post_book_handler':
-                            $response = (new Book($this->container, $request))->postOneHandler(
-                                $this->uri,
-                                $this->container->get('HttpTransformer')
-                                    ->deserialize($this->container->get('RawInput')->get()),
-                            );
-                            break;
-                    }
+                    $response = $this->handle($routeInfo[1], $routeInfo[2], $request);
                 } catch (\LibraryCatalog\Exception\HttpBadRequestException $e) {
                     $response = (new Error($this->container, $request))
                         ->badRequestError($this->uri, $e->getMessage());
@@ -119,7 +87,62 @@ class Router
                 break;
             default:
                 // Undefined behavior.
-                $response = (new Error($this->container, $request))->systemError($this->uri);
+                $response = (new Error($this->container, $request))
+                    ->systemError($this->uri, 'Undefined behavior');
+                break;
+        }
+
+        return $response;
+    }
+
+    /**
+     * @param string $handler
+     * @param array $params
+     * @param RequestInterface $request
+     * @return ResponseInterface
+     * @throws \DI\DependencyException
+     * @throws \DI\NotFoundException
+     * @throws \LibraryCatalog\Controller\TransformerException
+     * @throws \LibraryCatalog\Exception\HttpUnauthorizedException
+     * @throws \Rakit\Validation\RuleQuashException
+     */
+    protected function handle(string $handler, array $params, RequestInterface $request): ResponseInterface
+    {
+        switch ($handler) {
+            case 'index':
+                $response = (new Index($this->container, $request))->indexAction();
+                break;
+            case 'healthcheck':
+                $response = (new Index($this->container, $request))->healthcheckAction();
+                break;
+
+            case 'get_author_handler':
+                $response = (new Author($this->container, $request))
+                    ->getOneHandler($this->uri, $params['id']);
+                break;
+            case 'post_author_handler':
+                $response = (new Author($this->container, $request))->postOneHandler(
+                    $this->uri,
+                    $this->container->get('HttpTransformer')
+                        ->deserialize($this->container->get('RawInput')->get()),
+                );
+                break;
+
+            case 'get_book_handler':
+                $response = (new Book($this->container, $request))
+                    ->getOneHandler($this->uri, $params['id']);
+                break;
+            case 'post_book_handler':
+                $response = (new Book($this->container, $request))->postOneHandler(
+                    $this->uri,
+                    $this->container->get('HttpTransformer')
+                        ->deserialize($this->container->get('RawInput')->get()),
+                );
+                break;
+            default:
+                // Undefined behavior.
+                $response = (new Error($this->container, $request))
+                    ->systemError($this->uri, 'Undefined route');
                 break;
         }
 
