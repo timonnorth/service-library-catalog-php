@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\Controller;
+namespace Tests\Controller\V1;
 
 use Tests\Entity\AuthorTrait;
 use Tests\Entity\BookTrait;
