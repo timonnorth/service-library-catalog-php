@@ -35,7 +35,7 @@ class BookRepositoryRedis implements BookRepositoryInterface, WarmRepositoryInte
         $this->parentRepository = $parentRepository;
         $this->serializer = $serializer;
         $this->client = $client;
-        $this->keyPrefix = $versionPrefix === '' ?: $versionPrefix . '-';
+        $this->keyPrefix = $versionPrefix === '' ? '' : $versionPrefix . '-';
     }
 
     /**
@@ -68,7 +68,7 @@ class BookRepositoryRedis implements BookRepositoryInterface, WarmRepositoryInte
         }
 
         // We use parent Repository (usually DB) if data is not present or has invalidated by prefix.
-        if (!$book && $this->parentRepository) {
+        if (!$book && $this->parentRepository instanceof BookRepositoryInterface) {
             // Implement lock to make other request waiting for cache warming.
             $book = $this->transaction(
                 $this->client,

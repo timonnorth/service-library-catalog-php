@@ -57,7 +57,6 @@ class Router
         }
 
         $routeInfo = $this->getDispatcher()->dispatch($this->httpMethod, $this->uri);
-        $response = null;
         switch ($routeInfo[0]) {
             case Dispatcher::NOT_FOUND:
                 $response = (new Error($this->container, $request))->notFoundError($this->uri);
@@ -117,6 +116,10 @@ class Router
                     //throw $e;
                     $response = (new Error($this->container, $request))->systemError($this->uri);
                 }
+                break;
+            default:
+                // Undefined behavior.
+                $response = (new Error($this->container, $request))->systemError($this->uri);
                 break;
         }
 

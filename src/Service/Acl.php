@@ -37,15 +37,15 @@ class Acl extends \Laminas\Permissions\Acl\Acl implements AclInterface
         $book = new GenericResource(static::BOOK);
         $author = new GenericResource(static::AUTHOR);
 
-        $this->addRole(static::GUEST)
-            ->addRole(static::USER, static::GUEST)
-            ->addRole(static::ADMIN, static::USER)
-            ->addResource(static::BOOK)
-            ->addResource(static::AUTHOR);
+        $this->addRole($guest)
+            ->addRole($user, $guest)
+            ->addRole($admin, $user)
+            ->addResource($book)
+            ->addResource($author);
 
-        $this->allow(static::GUEST, [static::BOOK, static::AUTHOR], static::READ)
-            ->allow(static::USER, static::BOOK, static::ADD)
-            ->allow(static::ADMIN, static::AUTHOR, static::ADD);
+        $this->allow($guest, [$book, $author], static::READ)
+            ->allow($user, $book, static::ADD)
+            ->allow($admin, $author, static::ADD);
     }
 
     /**

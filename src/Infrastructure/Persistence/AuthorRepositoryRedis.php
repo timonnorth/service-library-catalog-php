@@ -42,7 +42,7 @@ class AuthorRepositoryRedis implements AuthorRepositoryInterface, WarmRepository
         $this->parentRepository = $parentRepository;
         $this->serializer = $serializer;
         $this->client = $client;
-        $this->keyPrefix = $versionPrefix === '' ?: $versionPrefix . '-';
+        $this->keyPrefix = $versionPrefix === '' ? '' : $versionPrefix . '-';
     }
 
     /**
@@ -76,7 +76,7 @@ class AuthorRepositoryRedis implements AuthorRepositoryInterface, WarmRepository
         }
 
         // We use parent Repository (usually DB) if data is not present or has invalidated by prefix.
-        if (!$author && $this->parentRepository) {
+        if (!$author && $this->parentRepository instanceof AuthorRepositoryInterface) {
             // Implement lock to make other request waiting for cache warming.
             $author = $this->transaction(
                 $this->client,
