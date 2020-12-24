@@ -10,9 +10,9 @@ return [
         ->constructor(new LibraryCatalog\Transformer\Encoder\Json()),
     'Serializer' => \DI\create(LibraryCatalog\Transformer\Serializer::class)
         ->constructor(new LibraryCatalog\Transformer\Encoder\Json()),
+    'Redis' => \DI\create(\Predis\Client::class),
     'AuthorRepositoryPdo' => \Di\create(Repository\AuthorRepositoryPdoSqlite::class)
         ->constructor(\Di\get('Serializer'), "", "", "", ""),
-    'Redis' => \DI\create(\Predis\Client::class),
     'AuthorRepositoryRedis' => \Di\create(\LibraryCatalog\Infrastructure\Persistence\AuthorRepositoryRedis::class)
         ->constructor(
             \Di\get('AuthorRepositoryPdo'),

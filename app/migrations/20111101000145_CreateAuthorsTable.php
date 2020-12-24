@@ -18,7 +18,7 @@ class CreateAuthorsTable extends Migration
      */
     public function down()
     {
-        $sql = "DELETE TABLE `authors`";
+        $sql = "DROP TABLE `authors`";
         $container = $this->getContainer();
         $container['db']->query($sql);
     }
@@ -45,7 +45,7 @@ class CreateAuthorsTable extends Migration
     /**
      * @return string
      */
-    public function sqlSqlite()
+    public function sqlUpSqlite()
     {
         return "
             CREATE TABLE IF NOT EXISTS `authors` (
@@ -57,6 +57,14 @@ class CreateAuthorsTable extends Migration
                 `summary` TEXT,
                 PRIMARY KEY (`id`)
             );";
+    }
+
+    /**
+     * @return string
+     */
+    public function sqlDownSqlite()
+    {
+        return "DROP TABLE `authors`";
     }
 }
 

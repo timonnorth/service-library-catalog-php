@@ -7,12 +7,15 @@ namespace Tests;
 use DI\Container;
 use DI\ContainerBuilder;
 use LibraryCatalog\Transformer\Serializer;
+use Predis\Client;
 use Psr\Http\Message\ResponseInterface;
 
 class TestCase extends \PHPUnit\Framework\TestCase
 {
     /** @var Container */
-    protected ?Container $container;
+    protected static Container $container;
+    /** @var \PDO */
+    protected static ?\PDO $pdo;
 
     /**
      * TestCase constructor.
@@ -25,7 +28,6 @@ class TestCase extends \PHPUnit\Framework\TestCase
         if (!defined('__APPDIR__')) {
             define('__APPDIR__', realpath(sprintf('%s/..', __DIR__)));
         }
-        $this->container = null;
 
         parent::__construct($name, $data, $dataName);
     }
@@ -36,20 +38,17 @@ class TestCase extends \PHPUnit\Framework\TestCase
      */
     protected function getContainer(): Container
     {
-        if ($this->container === null) {
+        if (!isset(static::$container)) {
             $containerBuilder = new ContainerBuilder();
             $containerBuilder->addDefinitions(__DIR__ . '/config.php');
 
-            $this->container = $containerBuilder->build();
+            static::$container = $containerBuilder->build();
 
             // Prepare Redis mock.
-            $factory          = new \M6Web\Component\RedisMock\RedisMockFactory();
-            $myRedisMockClass = $factory->getAdapterClass('\Predis\Client');
-            $myRedisMock      = new $myRedisMockClass([]);
-            $this->container->set('Redis', $myRedisMock);
+            static::setRedisMock();
         }
 
-        return $this->container;
+        return static::$container;
     }
 
     /**
@@ -70,25 +69,39 @@ class TestCase extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @throws \DI\DependencyException
-     * @throws \DI\NotFoundException
+     * @param bool $clear
+     * @throws \Exception
      */
-    protected function runDbMigration(): void
+    protected static function runDbMigration(bool $clear = false): void
     {
         require_once __APPDIR__ . "/app/migrations/20111101000145_CreateAuthorsTable.php";
         require_once __APPDIR__ . "/app/migrations/20111101000146_CreateBooksTable.php";
 
-        foreach ([
-            (new \CreateAuthorsTable(0))->sqlSqlite(),
-            (new \CreateBooksTable(0))->sqlSqlite(),
-        ] as $sql) {
-            $stmt = $this->pdo()->prepare($sql);
+        if ($clear) {
+            $sources = [
+                (new \CreateBooksTable(0))->sqlDownSqlite(),
+                (new \CreateAuthorsTable(0))->sqlDownSqlite(),
+            ];
+        } else {
+            $sources = [
+                (new \CreateAuthorsTable(0))->sqlUpSqlite(),
+                (new \CreateBooksTable(0))->sqlUpSqlite(),
+            ];
+        }
+
+        foreach ($sources as $sql) {
+            $stmt = static::pdo()->prepare($sql);
             if ($stmt === false) {
-                throw new \Exception(json_encode($this->pdo()->errorInfo()));
+                throw new \Exception(json_encode(static::pdo()->errorInfo()));
             }
             if (!$stmt->execute()) {
-                throw new \Exception(json_encode($this->pdo()->errorInfo()));
+                throw new \Exception(json_encode(static::pdo()->errorInfo()));
             }
+        }
+
+        if ($clear) {
+            // Clear redis.
+            static::setRedisMock();
         }
     }
 
@@ -108,12 +121,34 @@ class TestCase extends \PHPUnit\Framework\TestCase
 
     /**
      * @return \PDO
-     * @throws \DI\DependencyException
-     * @throws \DI\NotFoundException
      */
-    protected function pdo(): \PDO
+    protected static function pdo(): \PDO
     {
-        return $this->getContainer()->get('AuthorRepositoryPdo')->pdo();
+        if (!isset(static::$pdo)) {
+            static::$pdo = new \PDO(
+                'sqlite::memory:',
+                null,
+                null,
+                array(\PDO::ATTR_PERSISTENT => true),
+            );
+        }
+
+        return static::$pdo;
+    }
+
+    /**
+     * @return void
+     */
+    protected static function setRedisMock(): void
+    {
+        $factory          = new \M6Web\Component\RedisMock\RedisMockFactory();
+        $myRedisMockClass = $factory->getAdapterClass('\Predis\Client');
+        $myRedisMock      = new $myRedisMockClass([]);
+
+        // Emulate flushall.
+        $myRedisMock->del($myRedisMock->keys('*'));
+
+        static::$container->set('Redis', $myRedisMock);
     }
 
     /**
@@ -128,15 +163,17 @@ class TestCase extends \PHPUnit\Framework\TestCase
 
     /**
      * @param string|array $body
+     * @return TestCase
      * @throws \DI\DependencyException
      * @throws \DI\NotFoundException
      */
-    protected function setRawInput($body)
+    protected function setRawInput($body): TestCase
     {
         if (is_array($body)) {
             $body = json_encode($body);
         }
-        $this->container->get('RawInput')->set($body);
+        $this->getContainer()->get('RawInput')->set($body);
+        return $this;
     }
 
     /**

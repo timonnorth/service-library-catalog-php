@@ -4,19 +4,12 @@ declare(strict_types=1);
 
 namespace Tests\Controller;
 
-use Tests\TestCase;
+use Tests\Entity\AuthorTrait;
+use Tests\TestCaseMigration;
 
-class AuthorTest extends TestCase
+class AuthorTest extends TestCaseMigration
 {
-    /**
-     * @throws \DI\DependencyException
-     * @throws \DI\NotFoundException
-     */
-    public function setUp(): void
-    {
-        parent::setUp();
-        $this->runDbMigration();
-    }
+    use AuthorTrait;
 
     public function testNotAuthed()
     {
@@ -81,17 +74,27 @@ class AuthorTest extends TestCase
                 "summary" => "The Summary maximum is 65534",
             ],
         ];
-        $this->setRawInput([
+        $response = $this->setRawInput([
             'name' => $this->generateString(256),
             'deathdate' => 'uno',
             'biography' => $this->generateString(65535),
             'summary' => $this->generateString(65535),
             'foo' => 'bar'
-        ]);
-
-        $response = $this->route('POST', '/author', $this->getAuthorization('admin:3'));
+        ])->route('POST', '/author', $this->getAuthorization('admin:3'));
 
         self::assertEquals(400, $response->getStatusCode());
         self::assertJsonStringEqualsJsonString(json_encode($expected), (string)$response->getBody());
+    }
+
+    public function testCreateOk()
+    {
+        $authorExpected = $this->createAuthor1();
+        $this->getContainer()->get('AuthorRepositoryPdo')->setIdForce(1);
+        $input = $this->getSerializer()->extractFields($authorExpected);
+        $response = $this->setRawInput($input)
+            ->route('POST', '/author', $this->getAuthorization('admin:3'));
+
+        self::assertEquals(200, $response->getStatusCode());
+        self::assertJsonStringEqualsJsonString(json_encode(get_object_vars($authorExpected)), (string)$response->getBody());
     }
 }

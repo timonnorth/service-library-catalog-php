@@ -18,7 +18,7 @@ class CreateBooksTable extends Migration
      */
     public function down()
     {
-        $sql = "DELETE TABLE `books`";
+        $sql = "DROP TABLE `books`";
         $container = $this->getContainer();
         $container['db']->query($sql);
     }
@@ -43,7 +43,7 @@ class CreateBooksTable extends Migration
     /**
      * @return string
      */
-    public function sqlSqlite()
+    public function sqlUpSqlite()
     {
         return "
             CREATE TABLE IF NOT EXISTS `books` (
@@ -53,6 +53,14 @@ class CreateBooksTable extends Migration
                 `authorId` int(11) NOT NULL,
                 PRIMARY KEY (`id`)
             );";
+    }
+
+    /**
+     * @return string
+     */
+    public function sqlDownSqlite()
+    {
+        return "DROP TABLE `books`";
     }
 }
 

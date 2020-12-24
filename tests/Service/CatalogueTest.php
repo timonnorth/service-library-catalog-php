@@ -8,22 +8,12 @@ use LibraryCatalog\Entity\Book;
 use LibraryCatalog\Service\Catalogue;
 use Tests\Entity\AuthorTrait;
 use Tests\Entity\BookTrait;
-use Tests\TestCase;
+use Tests\TestCaseMigration;
 
-class CatalogueTest extends TestCase
+class CatalogueTest extends TestCaseMigration
 {
-    use AuthorTrait;
-    use BookTrait;
-
-    /**
-     * @throws \DI\DependencyException
-     * @throws \DI\NotFoundException
-     */
-    public function setUp(): void
-    {
-        parent::setUp();
-        $this->runDbMigration();
-    }
+    use AuthorTrait,
+        BookTrait;
 
     public function testAuthorNotFound()
     {

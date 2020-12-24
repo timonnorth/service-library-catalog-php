@@ -4,10 +4,15 @@ declare(strict_types=1);
 
 namespace Repository;
 
+use LibraryCatalog\Entity\Author;
 use LibraryCatalog\Infrastructure\Persistence\AuthorRepositoryPdo;
+use LibraryCatalog\Service\Repository\Exception;
 
 class AuthorRepositoryPdoSqlite extends AuthorRepositoryPdo
 {
+    /** @var mixed */
+    protected $id;
+
     /**
      * @param string $host
      * @param string $user
@@ -31,10 +36,24 @@ class AuthorRepositoryPdoSqlite extends AuthorRepositoryPdo
     }
 
     /**
-     * @return \PDO
+     * @param Author $author
+     * @return void
+     * @throws Exception
      */
-    public function pdo(): \PDO
+    public function save(Author $author): void
     {
-        return ($this->connection)();
+        if (isset($this->id) && $this->id != '') {
+            $author->id = $this->id;
+        }
+        parent::save($author);
+        $this->id = null;
+    }
+
+    /**
+     * @param $id
+     */
+    public function setIdForce($id): void
+    {
+        $this->id = $id;
     }
 }
