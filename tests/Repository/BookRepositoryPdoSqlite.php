@@ -4,10 +4,15 @@ declare(strict_types=1);
 
 namespace Repository;
 
+use LibraryCatalog\Entity\Book;
 use LibraryCatalog\Infrastructure\Persistence\BookRepositoryPdo;
+use LibraryCatalog\Service\Repository\Exception;
 
 class BookRepositoryPdoSqlite extends BookRepositoryPdo
 {
+    /** @var mixed */
+    protected $id;
+
     /**
      * @param string $host
      * @param string $user
@@ -31,10 +36,24 @@ class BookRepositoryPdoSqlite extends BookRepositoryPdo
     }
 
     /**
-     * @return \PDO
+     * @param Book $book
+     * @return void
+     * @throws Exception
      */
-    public function pdo(): \PDO
+    public function save(Book $book): void
     {
-        return ($this->connection)();
+        if (isset($this->id) && $this->id != '') {
+            $book->id = $this->id;
+        }
+        parent::save($book);
+        $this->id = null;
+    }
+
+    /**
+     * @param $id
+     */
+    public function setIdForce($id): void
+    {
+        $this->id = $id;
     }
 }

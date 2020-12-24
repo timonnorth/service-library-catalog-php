@@ -54,7 +54,7 @@ class AuthInBearer implements AuthInInterface
     public function getPayload(): string
     {
         $this->parse();
-        return $this->payload;
+        return $this->payload ?? '';
     }
 
     /**

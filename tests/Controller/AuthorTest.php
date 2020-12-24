@@ -22,6 +22,18 @@ class AuthorTest extends TestCaseMigration
         );
     }
 
+    public function testBadRequest()
+    {
+        $response = $this->setRawInput('I am so bad')
+            ->route('POST', '/author', $this->getAuthorization('user:3'));
+
+        self::assertEquals(400, $response->getStatusCode());
+        self::assertJsonStringEqualsJsonString(
+            '{"message":"Bad request, can not json-decode input data","code":""}',
+            (string)$response->getBody()
+        );
+    }
+
     public function testAuthorForbidden()
     {
         $response = $this->route('GET', '/author/122', $this->getAuthorization('unknown:3'));
@@ -35,7 +47,7 @@ class AuthorTest extends TestCaseMigration
 
     public function testAuthorNotFound()
     {
-        $response = $this->route('GET', '/author/122', $this->getAuthorization('user:3'));
+        $response = $this->route('GET', '/author/1', $this->getAuthorization('user:3'));
 
         self::assertEquals(404, $response->getStatusCode());
         self::assertJsonStringEqualsJsonString(
@@ -93,6 +105,17 @@ class AuthorTest extends TestCaseMigration
         $input = $this->getSerializer()->extractFields($authorExpected);
         $response = $this->setRawInput($input)
             ->route('POST', '/author', $this->getAuthorization('admin:3'));
+
+        self::assertEquals(200, $response->getStatusCode());
+        self::assertJsonStringEqualsJsonString(json_encode(get_object_vars($authorExpected)), (string)$response->getBody());
+    }
+
+    public function testLoadAfterCreation()
+    {
+        $authorExpected = $this->createAuthor1();
+        $authorExpected->books = [];
+
+        $response = $this->route('GET', '/author/1', $this->getAuthorization('guest:'));
 
         self::assertEquals(200, $response->getStatusCode());
         self::assertJsonStringEqualsJsonString(json_encode(get_object_vars($authorExpected)), (string)$response->getBody());
