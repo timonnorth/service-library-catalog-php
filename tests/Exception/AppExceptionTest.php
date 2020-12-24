@@ -15,4 +15,10 @@ class AppExceptionTest extends \PHPUnit\Framework\TestCase
     {
         self::assertEquals('Tiesto', (new AppException('Tiesto'))->getMessage());
     }
+
+    public function testSetCode()
+    {
+        $e = (new AppException())->setCode('ttt');
+        self::assertEquals('ttt', $e->getCode());
+    }
 }
