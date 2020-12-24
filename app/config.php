@@ -11,8 +11,8 @@ return [
         ->constructor(
             \Di\get('AuthorRepositoryPdo'),
             \Di\get('Serializer'),
-            getenv('REDIS_PARAMS'),
-            '1'
+            new \Predis\Client(getenv('REDIS_PARAMS')),
+            '1',
             ),
     'AuthorRepositoryPdo' => \Di\create(LibraryCatalog\Infrastructure\Persistence\AuthorRepositoryPdo::class)
         ->constructor(
@@ -26,7 +26,7 @@ return [
         ->constructor(
             \Di\get('BookRepositoryPdo'),
             \Di\get('Serializer'),
-            getenv('REDIS_PARAMS'),
+            new \Predis\Client(getenv('REDIS_PARAMS')),
             '1'
         ),
     'BookRepositoryPdo' => \Di\create(LibraryCatalog\Infrastructure\Persistence\BookRepositoryPdo::class)
@@ -41,7 +41,7 @@ return [
         ->constructor(
             \Di\get('AuthorRepositoryRedis'),
             \Di\get('BookRepositoryRedis'),
-        ),
+            ),
     'AuthIn' => \DI\create(\LibraryCatalog\Service\AuthInBearer::class)
         ->constructor(getenv('AUTH_SECRET')),
     'Acl' => \DI\create(\LibraryCatalog\Service\Acl::class),

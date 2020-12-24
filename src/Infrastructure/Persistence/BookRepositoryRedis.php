@@ -6,6 +6,7 @@ namespace LibraryCatalog\Infrastructure\Persistence;
 
 use LibraryCatalog\Entity\Book;
 use LibraryCatalog\Service\Repository\BookRepositoryInterface;
+use LibraryCatalog\Service\Repository\RedisTrait;
 use LibraryCatalog\Service\Repository\SerializerTrait;
 use LibraryCatalog\Service\Repository\WarmRepositoryInterface;
 use LibraryCatalog\Transformer\Serializer;
@@ -14,6 +15,9 @@ use Predis\Client;
 class BookRepositoryRedis implements BookRepositoryInterface, WarmRepositoryInterface
 {
     use SerializerTrait;
+    use RedisTrait;
+
+    protected const LOCK_TTL = 5;
 
     /** @var BookRepositoryInterface|null */
     protected ?BookRepositoryInterface $parentRepository;
@@ -25,12 +29,12 @@ class BookRepositoryRedis implements BookRepositoryInterface, WarmRepositoryInte
     public function __construct(
         ?BookRepositoryInterface $parentRepository,
         Serializer $serializer,
-        string $redisParams,
+        Client $client,
         string $versionPrefix
     ) {
         $this->parentRepository = $parentRepository;
         $this->serializer = $serializer;
-        $this->client = new Client($redisParams);
+        $this->client = $client;
         $this->keyPrefix = $versionPrefix === '' ?: $versionPrefix . '-';
     }
 
@@ -41,6 +45,7 @@ class BookRepositoryRedis implements BookRepositoryInterface, WarmRepositoryInte
      * @throws Serializer\Exception
      * @throws Serializer\HydrateException
      * @throws \LibraryCatalog\Transformer\Encoder\Exception
+     * @throws \Throwable
      */
     public function load($id, bool $withAuthor = false): ?Book
     {
@@ -62,18 +67,27 @@ class BookRepositoryRedis implements BookRepositoryInterface, WarmRepositoryInte
             }
         }
 
+        // We use parent Repository (usually DB) if data is not present or has invalidated by prefix.
         if (!$book && $this->parentRepository) {
-            // We use parent Repository (usually DB) if data is not present or has invalidated by prefix.
-            $book = $this->parentRepository->load($id);
-            // And after that we can warm our temporary-storage.
-            if ($book) {
-                try {
-                    $this->saveInternal($book);
-                } catch (\LibraryCatalog\Service\Repository\Exception $e) {
-                    // @todo Log
-                    // Return result as we can live with parent storage only.
+            // Implement lock to make other request waiting for cache warming.
+            $book = $this->transaction(
+                $this->client,
+                $this->keyPrefix . 'lock-book-' . $id,
+                static::LOCK_TTL,
+                function () use ($id) {
+                    $book = $this->parentRepository->load($id);
+                    // And after that we can warm our temporary-storage.
+                    if ($book) {
+                        try {
+                            $this->saveInternal($book);
+                        } catch (\LibraryCatalog\Service\Repository\Exception $e) {
+                            // @todo Log
+                            // Return result as we can live with parent storage only.
+                        }
+                    }
+                    return $book;
                 }
-            }
+            );
         }
 
         return $book;
@@ -127,14 +141,10 @@ class BookRepositoryRedis implements BookRepositoryInterface, WarmRepositoryInte
     public function reset($id): void
     {
         if ($id != '') {
-            if (
-                !$this->client->del([
+            $this->client->del([
                 $this->formatKey($id, true),
                 $this->formatKey($id, false),
-                ])
-            ) {
-                throw new \LibraryCatalog\Service\Repository\Exception("Can not reset Book in the Redis");
-            }
+            ]);
             if ($this->parentRepository instanceof WarmRepositoryInterface) {
                 $this->parentRepository->reset($id);
             }

@@ -10,14 +10,29 @@ return [
         ->constructor(new LibraryCatalog\Transformer\Encoder\Json()),
     'Serializer' => \DI\create(LibraryCatalog\Transformer\Serializer::class)
         ->constructor(new LibraryCatalog\Transformer\Encoder\Json()),
-    'AuthorRepository' => \Di\create(Repository\AuthorRepositoryPdoSqlite::class)
+    'AuthorRepositoryPdo' => \Di\create(Repository\AuthorRepositoryPdoSqlite::class)
         ->constructor(\Di\get('Serializer'), "", "", "", ""),
-    'BookRepository' => \Di\create(Repository\BookRepositoryPdoSqlite::class)
+    'Redis' => \DI\create(\Predis\Client::class),
+    'AuthorRepositoryRedis' => \Di\create(\LibraryCatalog\Infrastructure\Persistence\AuthorRepositoryRedis::class)
+        ->constructor(
+            \Di\get('AuthorRepositoryPdo'),
+            \Di\get('Serializer'),
+            \Di\get('Redis'),
+            '1',
+            ),
+    'BookRepositoryPdo' => \Di\create(Repository\BookRepositoryPdoSqlite::class)
         ->constructor(\Di\get('Serializer'), "", "", "", ""),
+    'BookRepositoryRedis' => \Di\create(\LibraryCatalog\Infrastructure\Persistence\BookRepositoryRedis::class)
+        ->constructor(
+            \Di\get('BookRepositoryPdo'),
+            \Di\get('Serializer'),
+            \Di\get('Redis'),
+            '1',
+            ),
     'Catalogue' => \DI\create(LibraryCatalog\Service\Catalogue::class)
         ->constructor(
-            \Di\get('AuthorRepository'),
-            \Di\get('BookRepository'),
+            \Di\get('AuthorRepositoryRedis'),
+            \Di\get('BookRepositoryRedis'),
         ),
     'AuthIn' => \DI\create(\LibraryCatalog\Service\AuthInBearer::class)
         ->constructor('test_secret'),

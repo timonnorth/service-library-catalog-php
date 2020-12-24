@@ -39,7 +39,14 @@ class TestCase extends \PHPUnit\Framework\TestCase
         if ($this->container === null) {
             $containerBuilder = new ContainerBuilder();
             $containerBuilder->addDefinitions(__DIR__ . '/config.php');
+
             $this->container = $containerBuilder->build();
+
+            // Prepare Redis mock.
+            $factory          = new \M6Web\Component\RedisMock\RedisMockFactory();
+            $myRedisMockClass = $factory->getAdapterClass('\Predis\Client');
+            $myRedisMock      = new $myRedisMockClass([]);
+            $this->container->set('Redis', $myRedisMock);
         }
 
         return $this->container;
@@ -106,7 +113,7 @@ class TestCase extends \PHPUnit\Framework\TestCase
      */
     protected function pdo(): \PDO
     {
-        return $this->getContainer()->get('AuthorRepository')->pdo();
+        return $this->getContainer()->get('AuthorRepositoryPdo')->pdo();
     }
 
     /**

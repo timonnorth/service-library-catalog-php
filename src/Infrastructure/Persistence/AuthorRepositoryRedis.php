@@ -6,6 +6,7 @@ namespace LibraryCatalog\Infrastructure\Persistence;
 
 use LibraryCatalog\Entity\Author;
 use LibraryCatalog\Service\Repository\AuthorRepositoryInterface;
+use LibraryCatalog\Service\Repository\RedisTrait;
 use LibraryCatalog\Service\Repository\SerializerTrait;
 use LibraryCatalog\Service\Repository\WarmRepositoryInterface;
 use LibraryCatalog\Transformer\Serializer;
@@ -14,6 +15,9 @@ use Predis\Client;
 class AuthorRepositoryRedis implements AuthorRepositoryInterface, WarmRepositoryInterface
 {
     use SerializerTrait;
+    use RedisTrait;
+
+    protected const LOCK_TTL = 5;
 
     /** @var AuthorRepositoryInterface|null */
     protected ?AuthorRepositoryInterface $parentRepository;
@@ -22,15 +26,22 @@ class AuthorRepositoryRedis implements AuthorRepositoryInterface, WarmRepository
     /** @var string */
     protected string $keyPrefix;
 
+    /**
+     * AuthorRepositoryRedis constructor.
+     * @param AuthorRepositoryInterface|null $parentRepository
+     * @param Serializer $serializer
+     * @param Client $client
+     * @param string $versionPrefix
+     */
     public function __construct(
         ?AuthorRepositoryInterface $parentRepository,
         Serializer $serializer,
-        string $redisParams,
+        Client $client,
         string $versionPrefix
     ) {
         $this->parentRepository = $parentRepository;
         $this->serializer = $serializer;
-        $this->client = new Client($redisParams);
+        $this->client = $client;
         $this->keyPrefix = $versionPrefix === '' ?: $versionPrefix . '-';
     }
 
@@ -41,6 +52,8 @@ class AuthorRepositoryRedis implements AuthorRepositoryInterface, WarmRepository
      * @throws Serializer\Exception
      * @throws Serializer\HydrateException
      * @throws \LibraryCatalog\Transformer\Encoder\Exception
+     * @throws \Exception
+     * @throws \Throwable
      */
     public function load($id, bool $withBooks = false): ?Author
     {
@@ -62,18 +75,27 @@ class AuthorRepositoryRedis implements AuthorRepositoryInterface, WarmRepository
             }
         }
 
+        // We use parent Repository (usually DB) if data is not present or has invalidated by prefix.
         if (!$author && $this->parentRepository) {
-            // We use parent Repository (usually DB) if data is not present or has invalidated by prefix.
-            $author = $this->parentRepository->load($id);
-            // And after that we can warm our temporary-storage.
-            if ($author) {
-                try {
-                    $this->saveInternal($author);
-                } catch (\LibraryCatalog\Service\Repository\Exception $e) {
-                    // @todo Log
-                    // Return result as we can live with parent storage only.
+            // Implement lock to make other request waiting for cache warming.
+            $author = $this->transaction(
+                $this->client,
+                $this->keyPrefix . 'lock-author-' . $id,
+                static::LOCK_TTL,
+                function () use ($id) {
+                    $author = $this->parentRepository->load($id);
+                    // And after that we can warm our temporary-storage.
+                    if ($author) {
+                        try {
+                            $this->saveInternal($author);
+                        } catch (\LibraryCatalog\Service\Repository\Exception $e) {
+                            // @todo Log
+                            // Return result as we can live with parent storage only.
+                        }
+                    }
+                    return $author;
                 }
-            }
+            );
         }
 
         return $author;
@@ -131,14 +153,10 @@ class AuthorRepositoryRedis implements AuthorRepositoryInterface, WarmRepository
     public function reset($id): void
     {
         if ($id != '') {
-            if (
-                !$this->client->del([
+            $this->client->del([
                 $this->formatKey($id, true),
                 $this->formatKey($id, false),
-                ])
-            ) {
-                throw new \LibraryCatalog\Service\Repository\Exception("Can not reset Author in the Redis");
-            }
+            ]);
             if ($this->parentRepository instanceof WarmRepositoryInterface) {
                 $this->parentRepository->reset($id);
             }
