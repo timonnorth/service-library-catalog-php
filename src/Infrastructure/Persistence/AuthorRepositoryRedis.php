@@ -58,21 +58,21 @@ class AuthorRepositoryRedis implements AuthorRepositoryInterface, WarmRepository
     public function load($id, bool $withBooks = false): ?Author
     {
         if ($id == '') {
-            $author = null;
-        } else {
-            $data = $this->client->get($this->formatKey($id, $withBooks));
-            if ($withBooks && !$data) {
-                // Try to load from cache but without books.
-                $data = $this->client->get($this->formatKey($id, false));
-                $wasReloaded = true;
-            }
+            return null;
+        }
 
-            $author = $this->deserialize($data, Author::class);
+        $data = $this->client->get($this->formatKey($id, $withBooks));
+        if ($withBooks && !$data) {
+            // Try to load from cache but without books.
+            $data = $this->client->get($this->formatKey($id, false));
+            $wasReloaded = true;
+        }
 
-            if ($withBooks && !isset($wasReloaded) && $author) {
-                // It means we got books from cache also, should mark in the entity.
-                $author->setBooks($author->books);
-            }
+        $author = $this->deserialize($data, Author::class);
+
+        if ($withBooks && !isset($wasReloaded) && $author) {
+            // It means we got books from cache also, should mark in the entity.
+            $author->setBooks($author->books);
         }
 
         // We use parent Repository (usually DB) if data is not present or has invalidated by prefix.

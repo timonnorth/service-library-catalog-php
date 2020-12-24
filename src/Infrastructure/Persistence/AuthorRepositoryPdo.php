@@ -42,6 +42,10 @@ class AuthorRepositoryPdo implements AuthorRepositoryInterface
      */
     public function load($id, bool $withBooks = false): ?Author
     {
+        if ($id == '') {
+            return null;
+        }
+
         $data = $this->fetchOne(static::TABLE_NAME, $id);
         return $data ? $this->serializer->hydrate($data, Author::class) : null;
     }
